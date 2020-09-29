@@ -10,7 +10,8 @@ RM=rm
 
 SYSDIRS= pa_migrate
 
-TESTDIRS= pa_ocaml_migrate_parsetree tests
+TESTDIRS= tests
+EXTRATESTDIRS= pa_ocaml_migrate_parsetree
 
 PACKAGES := pa_ppx.utils,pa_ppx.base,pa_ppx.import,pa_ppx.deriving
 
@@ -27,6 +28,9 @@ doc: all
 	rm -rf docs
 	tools/make-docs pa_ppx docs
 	make -C doc html
+
+test-everything: all
+	set -e; for i in $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
 
 test: all
 	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
