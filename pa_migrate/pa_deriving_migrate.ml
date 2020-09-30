@@ -205,7 +205,8 @@ end
 
 value pmatch pat ty =
   let rec pmrec acc = fun [
-    (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
+    (t1, t2) when Reloc.eq_ctyp t1 t2 -> acc
+  | (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
   | (<:ctyp< $p1$ $p2$ >>, <:ctyp< $t1$ $t2$ >>) ->
     pmrec (pmrec acc (p1, t1)) (p2, t2)
   | (<:ctyp< ' $id$ >>, ty) ->
@@ -220,7 +221,7 @@ value pmatch pat ty =
   else
     match pmrec [] (pat, ty) with [
       rho -> Some rho
-    | exception Failure _ -> None
+    | exception Failure "caught" -> None
     ]
 ;
 
@@ -467,6 +468,7 @@ value build_context loc ctxt tdl =
     let el = convert_down_list_expr e in
     let dll = List.map (build_default_dispatchers loc type_decls) el in
     List.concat dll
+  | <:expr< [] >> -> []
   | exception Failure _ -> []
   ] in
   let dispatchers = List.sort
@@ -525,7 +527,7 @@ value match_migrate_rule ~{except} t ctyp =
   List.find_map (fun (dname, t) ->
     if (Some dname) = except then None else
      ctyp
-     |> pmatch t.Dispatch1.srctype
+     |> (fun r -> pmatch t.Dispatch1.srctype r)
      |> Std.map_option (fun rho -> (t, rho))
   ) t.dispatchers
 ;
@@ -759,7 +761,10 @@ Pa_deriving.(Registry.add PI.{
   name = "migrate"
 ; alternates = []
 ; options = ["optional"; "default_dispatchers"; "dispatchers"; "dispatch_type"; "dispatch_table_constructor"; "inherit_type"]
-; default_options = let loc = Ploc.dummy in [ ("optional", <:expr< False >>) ]
+; default_options = let loc = Ploc.dummy in [
+    ("optional", <:expr< False >>) 
+  ; ("default_dispatchers", <:expr< [] >>) 
+  ]
 ; alg_attributes = ["nobuiltin"]
 ; expr_extensions = []
 ; ctyp_extensions = []
