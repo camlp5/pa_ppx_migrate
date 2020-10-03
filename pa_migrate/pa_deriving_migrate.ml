@@ -10,36 +10,9 @@ open Ppxutil ;
 open Surveil ;
 open Pa_deriving_base ;
 open Pa_ppx_utils ;
+open Ppxutil ;
 
 value debug = Pa_passthru.debug ;
-
-value string_list_of_expr e =
-  let rec lrec = fun [
-    <:expr< $uid:uid$ >> -> [uid]
-  | <:expr< $e1$ . $e2$ >> -> (lrec e1)@(lrec e2)
-  | e -> Ploc.raise (loc_of_expr e) (Failure "string_list_of_expr: unexpected expr")
-  ] in
-  lrec e
-;
-value longid_of_expr e =
-  let l = string_list_of_expr e in
-  Asttools.longident_of_string_list (loc_of_expr e) l
-;
-
-value convert_down_list_expr e =
-  let rec crec acc = fun [
-    <:expr< [] >> -> List.rev acc
-  | <:expr< [ $h$ :: $tl$ ] >> ->
-    crec [ h :: acc ] tl
-  | _ -> Ploc.raise (loc_of_expr e) (Failure Fmt.(str "convert_down_list_expr: malformed list-expression %a"
-                                                    Pp_MLast.pp_expr e))
-  ] in
-  crec [] e
-;
-
-value convert_up_list_expr loc el =
-  List.fold_right (fun e rhs -> <:expr< [ $e$ :: $rhs$ ] >>) el <:expr< [] >>
-;
 
 module Dispatch1 = struct
 type tyarg_t = {
@@ -85,11 +58,12 @@ value convert_subs loc e =
 ;
 
 value convert_field_name_list loc e =
-  let el = convert_down_list_expr e in
-  List.map (fun [ <:expr< $lid:f$ >> -> f
-                | _ -> Ploc.raise (loc_of_expr e) (Failure Fmt.(str "convert_field_name_list: malformed list %a"
-                                                                  Pp_MLast.pp_expr e))
-                ]) el
+  convert_down_list_expr
+    (fun [ <:expr< $lid:f$ >> -> f
+         | _ -> Ploc.raise (loc_of_expr e) (Failure Fmt.(str "convert_field_name_list: malformed list %a"
+                                                           Pp_MLast.pp_expr e))
+         ])
+    e
 ;
 
 value convert_tyarg loc type_decls name tyargs =
@@ -459,8 +433,7 @@ value build_context loc ctxt tdl =
   ] in
   let default_dispatchers = match option ctxt "default_dispatchers" with [
     <:expr< [ $_$ :: $_$ ] >> as e ->
-    let el = convert_down_list_expr e in
-    let dll = List.map (build_default_dispatchers loc type_decls) el in
+    let dll = convert_down_list_expr (build_default_dispatchers loc type_decls) e in
     List.concat dll
   | <:expr< [] >> -> []
   | exception Failure _ -> []
