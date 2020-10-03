@@ -13,6 +13,60 @@ open Pa_ppx_utils ;
 open Ppxutil ;
 
 value debug = Pa_passthru.debug ;
+open Pa_ppx_params.Runtime ;
+
+module Params = struct
+
+module Dispatch1 = struct
+
+value extract_case_branches = fun [
+  <:expr< fun [ $list:l$ ] >> ->
+    List.map (fun (p,wheno,e) ->
+        match Patt.unapplist p with [
+          (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
+        | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: case-branches must start with a UIDENT")
+        ]) l
+]
+;
+
+type tyarg_t = {
+  srctype : ctyp
+; dsttype : ctyp
+; dstmodule : option longid
+; inherit_code : option expr
+; code : option expr
+; custom_branches_code : (alist lident case_branch) [@convert ([%typ: expr], extract_case_branches);][@default [];]
+; custom_fields_code : (alist lident expr) [@default [];]
+; skip_fields : list lident [@default [];]
+; subs : list (ctyp * ctyp) [@default [];]
+} [@@deriving params;] ;
+type t = (alist lident tyarg_t) [@@deriving params;] ;
+end
+;
+module Migrate = struct
+
+type default_dispatcher_t = {
+  srcmod : longid
+; dstmod : longid
+; types : list lident
+; inherit_code : (alist lident expr) [@default [];]
+} [@@deriving params;]
+;
+
+type t = {
+  inherit_type : option ctyp
+; dispatch_type : lident
+; dispatch_table_constructor : lident
+; dispatchers : Dispatch1.t [@default [];]
+; default_dispatchers : list default_dispatcher_t [@default [];]
+} [@@deriving params;]
+;
+
+end
+;
+
+end
+;
 
 module Dispatch1 = struct
 type tyarg_t = {
@@ -66,68 +120,23 @@ value convert_field_name_list loc e =
     e
 ;
 
-value convert_tyarg loc type_decls name tyargs =
-  let alist = List.map (fun [
-      (<:patt< $lid:id$ >>, e) -> (id, e)
-    | _ -> Ploc.raise loc (Failure "bad tyarg label -- must be lident")
-    ]) tyargs in
-  let srctype = match List.assoc "srctype" alist with [
-    <:expr< [%typ: $type:t$] >> -> t
-  | _ -> Ploc.raise loc (Failure "bad srctype tyarg rhs -- must be [%typ: type]")
-  | exception Not_found -> Ploc.raise loc (Failure "missing srctype tyarg")
-  ] in
-  let dsttype = match List.assoc "dsttype" alist with [
-    <:expr< [%typ: $type:t$] >> -> t
-  | _ -> Ploc.raise loc (Failure "bad dsttype tyarg rhs -- must be [%typ: type]")
-  | exception Not_found -> Ploc.raise loc (Failure "missing dsttype tyarg")
-  ] in
-  let dstmodule = match List.assoc "dstmodule" alist with [
-    e -> Some (longid_of_expr e)
-  | exception Not_found ->
+value convert_tyarg loc type_decls name targ =
+  let srctype = targ.Params.Dispatch1.srctype in
+  let dsttype = targ.Params.Dispatch1.dsttype in
+  let dstmodule = match targ.Params.Dispatch1.dstmodule with [
+    Some _ as z -> z
+  | None ->
     match Ctyp.unapplist dsttype with [
       (<:ctyp:< $longid:li$ . $lid:_$ >>, _) -> Some li
     | _ -> None
     ]
   ] in
-  let code = match List.assoc "code" alist with [
-    e -> Some e
-  | exception Not_found -> None
-  ] in
-  let inherit_code = match List.assoc "inherit_code" alist with [
-    e -> Some e
-  | exception Not_found -> None
-  ] in
-  let custom_branches_code = match List.assoc "custom_branches_code" alist with [
-    <:expr:< fun [ $list:l$ ] >> ->
-      List.map (fun ((p, _, _) as branch) ->
-          match Patt.unapplist p with [
-            (<:patt< $uid:cid$ >>, _) -> (cid, branch)
-          | _ -> Ploc.raise (loc_of_patt p) (Failure "branches of a custom_branches_code must be constructor-patterns")
-          ]) l
-  | _ -> Ploc.raise loc (Failure "custom_branches_code MUST be of the form fun [ ... ]")
-  | exception Not_found -> []
-  ] in
-  let custom_fields_code = match List.assoc "custom_fields_code" alist with [
-    <:expr:< { $list:lel$ } >> ->
-      List.map (fun [
-          (<:patt< $lid:f$ >>, e) -> (f, e)
-        | _ -> Ploc.raise loc (Failure "branches of a custom_branches_code must be constructor-patterns")
-        ]) lel
-  | _ -> Ploc.raise loc (Failure "custom_fields_code MUST be of the form { field = expr, ... }")
-  | exception Not_found -> []
-  ] in
-  let skip_fields = match List. assoc "skip_fields" alist with [
-    <:expr:< [ $_$ :: $_$ ] >> as z -> convert_field_name_list loc z
-  | <:expr:< [ ] >> -> []
-  | _ -> Ploc.raise loc (Failure "bad skip_fields -- must be a list")
-  | exception Not_found -> []
-  ] in
-  let subs = match List. assoc "subs" alist with [
-    <:expr:< [ $_$ :: $_$ ] >> as z -> convert_subs loc z
-  | <:expr:< [ ] >> -> []
-  | _ -> Ploc.raise loc (Failure "bad tyarg rhs -- must be a list")
-  | exception Not_found -> []
-  ] in
+  let code = targ.Params.Dispatch1.code in
+  let inherit_code = targ.Params.Dispatch1.inherit_code in
+  let custom_branches_code = targ.Params.Dispatch1.custom_branches_code in
+  let custom_fields_code = targ.Params.Dispatch1.custom_fields_code in
+  let skip_fields = targ.Params.Dispatch1.skip_fields in
+  let subs = targ.Params.Dispatch1.subs in
   let type_vars = Std.uniquize((tyvars srctype)@(tyvars dsttype)@
                           List.concat (List.map (fun (a,b) -> (tyvars a)@(tyvars b)) subs)) in
   let subs_types = List.map (fun (a,b) -> <:ctyp< (migrater_t 'aux $a$ $b$) >>) subs in
@@ -335,61 +344,38 @@ value generate_srctype loc dsttype tyid =
   Ctyp.applist <:ctyp:< $lid:tyid$ >> args
 ;
 
-value generate_default_dispatcher loc type_decls inherit_code_specs tyid (srcmod, dstmod) td =
+value generate_default_dispatcher loc type_decls (tyid,dd) td =
+  let srcmod = dd.Params.Migrate.srcmod in
+  let dstmod = dd.Params.Migrate.dstmod in
   let dsttype = generate_dsttype (loc_of_type_decl td) (srcmod, dstmod) td in
   let srctype = generate_srctype (loc_of_type_decl td) dsttype tyid in
   let dsttype = fresh_tyv_args "1" dsttype in
   let srctype = fresh_tyv_args "0" srctype in
-  let subs = List.map2 (fun t1 t2 ->
-      <:expr< ([%typ: $type:t1$ ], [%typ: $type:t2$ ]) >>)
+  let subs = List.map2 (fun t1 t2 -> (t1, t2))
       (snd (Ctyp.unapplist srctype)) (snd (Ctyp.unapplist dsttype)) in
-  let subs = convert_up_list_expr loc subs in
   let rwname = Printf.sprintf "migrate_%s" tyid in
-  let extras = match List.assoc tyid inherit_code_specs with [
-    e -> [ (<:patt< inherit_code>>, e) ]
-  | exception Not_found -> []
+  let inherit_code = match List.assoc tyid dd.Params.Migrate.inherit_code with [
+    e -> Some e
+  | exception Not_found -> None
   ] in
   Dispatch1.convert loc type_decls
     (rwname,
-     [(<:patt< srctype >>, <:expr< [%typ: $type:srctype$] >>)
-     ; (<:patt< dsttype >>, <:expr< [%typ: $type:dsttype$] >>)
-     ; (<:patt< subs >>, subs)
-     ]@extras)
+     let open Params.Dispatch1 in {
+       srctype = srctype
+     ; dsttype = dsttype
+     ; dstmodule = None
+     ; inherit_code = inherit_code
+     ; code = None
+     ; custom_branches_code = []
+     ; custom_fields_code = []
+     ; skip_fields = []
+     ; subs = subs
+     })
 ;
 
-value build_default_dispatchers loc type_decls e =
-  let alist = match e with [
-    <:expr:< { $list:lel$ } >> ->
-      List.map (fun [
-          (<:patt< $lid:id$ >>, e) -> (id, e)
-        | _ -> Ploc.raise loc (Failure "bad default_dispatchers label -- must be lident")
-        ]) lel
-  | _ -> Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: bad arg %a"
-                                        Pp_MLast.pp_expr e))
-  ] in
-  let srcmod = match List.assoc "srcmod" alist with [
-    e -> longid_of_expr e
-  | exception Not_found -> Ploc.raise loc (Failure "build_default_dispatchers: no srcmod specified")
-  ] in
-  let dstmod = match List.assoc "dstmod" alist with [
-    e -> longid_of_expr e
-  | exception Not_found -> Ploc.raise loc (Failure "build_default_dispatchers: no dstmod specified")
-  ] in
-  let inherit_code = match List.assoc "inherit_code" alist with [
-    <:expr:< { $list:lel$ } >> as z ->
-    List.map (fun [
-        (<:patt< $lid:tyna$ >>, e) -> (tyna, e)
-      | _ -> Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: malformed inherit_code %a"
-                                            Pp_MLast.pp_expr z))
-      ]) lel
-    | exception Not_found -> []
-  ] in
-  let types = match List.assoc "types" alist with [
-    <:expr:< [ $_$ :: $_$ ] >> as e ->
-    Dispatch1.convert_field_name_list loc e
-  | _ -> Ploc.raise loc (Failure "build_default_dispatchers: malformed types field")
-  | exception Not_found -> Ploc.raise loc (Failure "build_default_dispatchers: no types specified")
-  ] in
+value build_default_dispatchers loc type_decls dd =
+ let types = dd.Params.Migrate.types in
+ let inherit_code = dd.Params.Migrate.inherit_code in
   if not (Std.subset (List.map fst inherit_code) types) then
     let extras = Std.subtract (List.map fst inherit_code) types in
     Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: extra members of inherit_code: %a"
@@ -398,8 +384,7 @@ value build_default_dispatchers loc type_decls e =
   List.map (fun tyid ->
     match List.assoc tyid type_decls with [
       td ->
-        generate_default_dispatcher (loc_of_type_decl td) type_decls inherit_code
-          tyid (srcmod, dstmod) td
+        generate_default_dispatcher (loc_of_type_decl td) type_decls (tyid, dd) td
       | exception Not_found -> Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: type %s not declared" tyid))
     ]) types
 ;
@@ -408,39 +393,16 @@ value build_context loc ctxt tdl =
   let type_decls = List.map (fun (MLast.{tdNam=tdNam} as td) ->
       (tdNam |> uv |> snd |> uv, td)
     ) tdl in
-  let open Ctxt in
-  let inherit_type = match option ctxt "inherit_type" with [
-      <:expr< [%typ: $type:t$] >> -> Some t
-    | _ -> Ploc.raise loc (Failure "pa_deriving.migrate: option inherit_type must be of the form [%typ: t]")
-    | exception Failure _ -> None
-  ] in
-  let dispatch_type_name = match option ctxt "dispatch_type" with [
-      <:expr< $lid:id$ >> -> id
-    | _ -> Ploc.raise loc (Failure "pa_deriving.migrate: must specify option dispatch_type")
-  ] in
-  let dispatch_table_constructor = match option ctxt "dispatch_table_constructor" with [
-      <:expr< $lid:id$ >> -> id
-    | _ -> Ploc.raise loc (Failure "pa_deriving.migrate: must specify option dispatch_table_constructor name")
-  ] in
-  let dispatchers = match option ctxt "dispatchers" with [
-    <:expr:< { $list:lel$ } >> ->
-      List.map (fun [
-          (<:patt< $lid:fname$ >>, <:expr:< { $list:tyargs$ } >>) ->
-          (Dispatch1.convert loc type_decls (fname, tyargs))
-        | _ -> Ploc.raise loc (Failure "pa_deriving.migrate: malformed dispatcher args")
-      ]) lel
-  | _ -> Ploc.raise loc (Failure "pa_deriving.migrate: malformed dispatchers option")
-  ] in
-  let default_dispatchers = match option ctxt "default_dispatchers" with [
-    <:expr< [ $_$ :: $_$ ] >> as e ->
-    let dll = convert_down_list_expr (build_default_dispatchers loc type_decls) e in
-    List.concat dll
-  | <:expr< [] >> -> []
-  | exception Failure _ -> []
-  ] in
+  let optarg =
+    let l = List.map (fun (k, e) -> (<:patt< $lid:k$ >>, e)) (Ctxt.options ctxt) in
+    <:expr< { $list:l$ } >> in
+  let rc0 = Params.Migrate.params optarg in
+  let dispatchers = List.map (Dispatch1.convert loc type_decls) rc0.Params.Migrate.dispatchers in
+  let more_dispatchers = List.concat (List.map (build_default_dispatchers loc type_decls)
+                                        rc0.Params.Migrate.default_dispatchers) in
   let dispatchers = List.sort
       (fun (n1,_) (n2,_) -> Stdlib.compare n1 n2)
-      (dispatchers@default_dispatchers) in
+      (dispatchers@more_dispatchers) in
   let repeated_dispatcher_names = Std2.hash_list_repeats (List.map fst dispatchers) in
   let sorted_repeated_dispatcher_names = List.sort Stdlib.compare repeated_dispatcher_names in
   if [] <> repeated_dispatcher_names then
@@ -449,14 +411,15 @@ value build_context loc ctxt tdl =
   else
   let pretty_rewrites = Prettify.mk_from_type_decls type_decls in
   {
-    inherit_type = inherit_type ;
-    dispatch_type_name = dispatch_type_name;
-    dispatch_table_constructor = dispatch_table_constructor;
+    inherit_type = rc0.Params.Migrate.inherit_type ;
+    dispatch_type_name = rc0.Params.Migrate.dispatch_type;
+    dispatch_table_constructor = rc0.Params.Migrate.dispatch_table_constructor;
     dispatchers = dispatchers ;
     type_decls = type_decls ;
     pretty_rewrites = pretty_rewrites
   }
 ;
+
 
 value reduce1 (id, tyargs) td = do {
   if List.length tyargs <> List.length (uv td.tdPrm) then
@@ -627,9 +590,8 @@ value rec generate_leaf_dispatcher_expression t d subs_rho = fun [
 ]
 
 and generate_dispatcher_expression ~{except} t subs_rho ty = 
-  let ct = canon_ctyp ty in
-  if List.mem_assoc ct subs_rho then
-    let (f_sub, f_result_ty) = List.assoc ct subs_rho in
+  if AList.mem ~{cmp=Reloc.eq_ctyp} ty subs_rho then
+    let (f_sub, f_result_ty) = AList.assoc ~{cmp=Reloc.eq_ctyp} ty subs_rho in
     let loc = loc_of_ctyp ty in
     (<:expr< $lid:f_sub$ >>, f_result_ty)
   else if List.mem (canon_ctyp ty) builtin_copy_types then
@@ -699,7 +661,7 @@ value toplevel_generate_dispatcher t (dname,d) = do {
   | None ->
     let srctype = d.Dispatch1.srctype in
     let loc = loc_of_ctyp srctype in
-    let subs_rho = List.mapi (fun i (lhsty, rhsty) -> (canon_ctyp lhsty, (Printf.sprintf "__subrw_%d" i, rhsty))) d.Dispatch1.subs in
+    let subs_rho = List.mapi (fun i (lhsty, rhsty) -> (lhsty, (Printf.sprintf "__subrw_%d" i, rhsty))) d.Dispatch1.subs in
     let subs_binders = List.map2 (fun (_,(v, _)) ty -> <:patt< ( $lid:v$ : $ty$ ) >>) subs_rho d.Dispatch1.subs_types in
     let (e, t) = generate_dispatcher_expression ~{except=Some dname} t subs_rho srctype in
     let loc = loc_of_expr e in

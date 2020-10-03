@@ -11,10 +11,10 @@ print <<"EOF";
 version = "$Version::version"
 description = "pa_ppx_migrate deriver"
 
-  requires(toploop) = "camlp5,pa_ppx.deriving"
+  requires(toploop) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime"
   archive(toploop) = "pa_deriving_migrate.cmo"
 
-    requires(syntax,preprocessor) = "camlp5,pa_ppx.deriving"
+    requires(syntax,preprocessor) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime"
     archive(syntax,preprocessor,-native) = "pa_deriving_migrate.cmo"
     archive(syntax,preprocessor,native) = "pa_deriving_migrate.cmx"
 
@@ -22,6 +22,6 @@ description = "pa_ppx_migrate deriver"
   requires(byte) = "camlp5,pa_ppx.deriving.link"
   archive(byte) = "pa_deriving_migrate.cmo"
   )
-  requires = "camlp5,pa_ppx.deriving,pa_ppx.runtime"
+  requires = "camlp5,pa_ppx.deriving,pa_ppx.runtime,pa_ppx.params_runtime"
 
 EOF
