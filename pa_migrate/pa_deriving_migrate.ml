@@ -90,8 +90,6 @@ value prettify rules t =
 end
 ;
 
-module Params = struct
-
 module Dispatch1 = struct
 
 value extract_case_branches = fun [
@@ -105,69 +103,6 @@ value extract_case_branches = fun [
 ]
 ;
 
-type tyarg_t = {
-  srctype : ctyp
-; dsttype : ctyp
-; dstmodule : option longid
-; inherit_code : option expr
-; code : option expr
-; custom_branches_code : option expr 
-; custom_branches : (alist lident case_branch) [@computed extract_case_branches custom_branches_code;]
-; custom_fields_code : (alist lident expr) [@default [];]
-; skip_fields : list lident [@default [];]
-; subs : list (ctyp * ctyp) [@default [];]
-} [@@deriving params;] ;
-type t = (alist lident tyarg_t) [@@deriving params;] ;
-end
-;
-
-module Migrate = struct
-
-type default_dispatcher_t = {
-  srcmod : longid
-; dstmod : longid
-; types : list lident
-; inherit_code : (alist lident expr) [@default [];]
-} [@@deriving params;]
-;
-
-type t = {
-  inherit_type : option ctyp
-; dispatch_type : lident
-; dispatch_table_constructor : lident
-; dispatchers : Dispatch1.t [@default [];]
-; default_dispatchers : list default_dispatcher_t [@default [];]
-; type_decls : list (string * MLast.type_decl) [@computed type_decls;]
-} [@@deriving params {
-    formal_args = {
-      t = [ type_decls ]
-    }
-  };]
-;
-
-end
-;
-
-end
-;
-
-module Dispatch1 = struct
-type tyarg_t = {
-  name: string
-; srctype : ctyp
-; dsttype : ctyp
-; dstmodule : option longid
-; inherit_code : option expr
-; code : option expr
-; custom_branches_code : list (string * MLast.case_branch)
-; custom_fields_code : list (string * MLast.expr)
-; skip_fields : list string
-; type_vars : list string
-; subs : list (ctyp * ctyp)
-; subs_types : list ctyp
-} ;
-type t = (string * tyarg_t) ;
-
 value tyvars t =
   let rec trec acc = fun [
     <:ctyp< $t1$ $t2$ >> -> trec (trec acc t1) t2
@@ -176,6 +111,40 @@ value tyvars t =
   ] in
   Std.uniquize(trec [] t)
 ;
+
+value compute_type_vars srctype dsttype subs =
+  Std.uniquize((tyvars srctype)@(tyvars dsttype)@
+               List.concat (List.map (fun (a,b) -> (tyvars a)@(tyvars b)) subs))
+;
+
+value compute_subs_types loc subs =
+  List.map (fun (a,b) -> <:ctyp< (migrater_t 'aux $a$ $b$) >>) subs ;
+
+value longid_of_dstmodule dsttype = fun [
+  Some _ as z -> z
+| None ->
+  match Ctyp.unapplist dsttype with [
+    (<:ctyp:< $longid:li$ . $lid:_$ >>, _) -> Some li
+  | _ -> None
+  ]
+]
+;
+
+type tyarg_t = {
+  srctype : ctyp
+; dsttype : ctyp
+; raw_dstmodule : option longid [@name dstmodule;]
+; dstmodule : option longid [@computed longid_of_dstmodule dsttype raw_dstmodule;]
+; inherit_code : option expr
+; code : option expr
+; custom_branches_code : option expr 
+; custom_branches : (alist lident case_branch) [@computed extract_case_branches custom_branches_code;]
+; custom_fields_code : (alist lident expr) [@default [];]
+; skip_fields : list lident [@default [];]
+; subs : list (ctyp * ctyp) [@default [];]
+; type_vars : list string [@computed compute_type_vars srctype dsttype subs;]
+; subs_types : list ctyp [@computed compute_subs_types loc subs;]
+} [@@deriving params;] ;
 
 value to_type (_, t) =
   let loc = loc_of_ctyp t.srctype in
@@ -203,45 +172,6 @@ value convert_field_name_list loc e =
     e
 ;
 
-value convert_tyarg loc type_decls name targ =
-  let srctype = targ.Params.Dispatch1.srctype in
-  let dsttype = targ.Params.Dispatch1.dsttype in
-  let dstmodule = match targ.Params.Dispatch1.dstmodule with [
-    Some _ as z -> z
-  | None ->
-    match Ctyp.unapplist dsttype with [
-      (<:ctyp:< $longid:li$ . $lid:_$ >>, _) -> Some li
-    | _ -> None
-    ]
-  ] in
-  let code = targ.Params.Dispatch1.code in
-  let inherit_code = targ.Params.Dispatch1.inherit_code in
-  let custom_branches = targ.Params.Dispatch1.custom_branches in
-  let custom_fields_code = targ.Params.Dispatch1.custom_fields_code in
-  let skip_fields = targ.Params.Dispatch1.skip_fields in
-  let subs = targ.Params.Dispatch1.subs in
-  let type_vars = Std.uniquize((tyvars srctype)@(tyvars dsttype)@
-                          List.concat (List.map (fun (a,b) -> (tyvars a)@(tyvars b)) subs)) in
-  let subs_types = List.map (fun (a,b) -> <:ctyp< (migrater_t 'aux $a$ $b$) >>) subs in
-  { name = name
-  ; srctype = srctype
-  ; dsttype = dsttype
-  ; dstmodule = dstmodule
-  ; code = code
-  ; inherit_code = inherit_code
-  ; custom_branches_code = custom_branches
-  ; custom_fields_code = custom_fields_code
-  ; skip_fields = skip_fields
-  ; subs = subs
-  ; type_vars = type_vars
-  ; subs_types = subs_types
-  }
-;
-
-value convert loc type_decls (fname, tyargs) =
-  (fname, convert_tyarg loc type_decls fname tyargs)
-;
-
 value expr_wrap_dsttype_module d e =
   match d.dstmodule with [
     None -> e
@@ -262,39 +192,15 @@ value patt_wrap_dsttype_module d p =
 
 end
 ;
+
 module Migrate = struct
 
-type t = {
-  inherit_type : option MLast.ctyp
-; dispatch_type_name : string
-; dispatch_table_constructor : string
-; dispatchers : list Dispatch1.t
-; type_decls : list (string * MLast.type_decl)
-; pretty_rewrites : list (string * Prettify.t)
-} ;
-
-value dispatch_table_type_decls loc t =
-  let ltl = List.map (fun (dispatcher_name, d) ->
-      let ty = Dispatch1.to_type (dispatcher_name, d) in
-      let ty = Prettify.prettify t.pretty_rewrites ty in
-      (loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)
-    ) t.dispatchers in
-  let aux = (loc, "aux", False, <:ctyp< 'aux >>, <:vala< [] >>) in
-  let dispatch_table_type = <:ctyp< { $list:[aux :: ltl]$ } >> in
-  let migrater_type = match t.inherit_type with [
-    None -> <:ctyp< $lid:t.dispatch_type_name$ 'aux -> 'a -> 'b >>
-  | Some inhty -> <:ctyp< $lid:t.dispatch_type_name$ 'aux -> $inhty$ -> 'a -> 'b >>
-  ] in
-  [ <:type_decl< $lid:t.dispatch_type_name$ 'aux = $dispatch_table_type$ >> ;
-    <:type_decl< migrater_t 'aux 'a 'b = $migrater_type$ >> ]
-;
-
-value dispatch_table_expr loc t =
-  let lel = List.map (fun (dispatcher_name, t) ->
-      (<:patt< $lid:dispatcher_name$ >>, <:expr< $lid:dispatcher_name$ >>)
-    ) t.dispatchers in
-  let aux = (<:patt< aux >>, <:expr< aux >>) in
-  <:expr< fun aux -> { $list:[aux :: lel]$ } >>
+type default_dispatcher_t = {
+  srcmod : longid
+; dstmod : longid
+; types : list lident
+; inherit_code : (alist lident expr) [@default [];]
+} [@@deriving params;]
 ;
 
 value must_subst_lid (srclid, dstlid) li =
@@ -353,8 +259,8 @@ value generate_srctype loc dsttype tyid =
 ;
 
 value generate_default_dispatcher loc type_decls (tyid,dd) td =
-  let srcmod = dd.Params.Migrate.srcmod in
-  let dstmod = dd.Params.Migrate.dstmod in
+  let srcmod = dd.srcmod in
+  let dstmod = dd.dstmod in
   let dsttype = generate_dsttype (loc_of_type_decl td) (srcmod, dstmod) td in
   let srctype = generate_srctype (loc_of_type_decl td) dsttype tyid in
   let dsttype = fresh_tyv_args "1" dsttype in
@@ -362,29 +268,31 @@ value generate_default_dispatcher loc type_decls (tyid,dd) td =
   let subs = List.map2 (fun t1 t2 -> (t1, t2))
       (snd (Ctyp.unapplist srctype)) (snd (Ctyp.unapplist dsttype)) in
   let rwname = Printf.sprintf "migrate_%s" tyid in
-  let inherit_code = match List.assoc tyid dd.Params.Migrate.inherit_code with [
+  let inherit_code = match List.assoc tyid dd.inherit_code with [
     e -> Some e
   | exception Not_found -> None
   ] in
-  Dispatch1.convert loc type_decls
-    (rwname,
-     let open Params.Dispatch1 in {
-       srctype = srctype
-     ; dsttype = dsttype
-     ; dstmodule = None
-     ; inherit_code = inherit_code
-     ; code = None
-     ; custom_branches_code = None
-     ; custom_branches = []
-     ; custom_fields_code = []
-     ; skip_fields = []
-     ; subs = subs
-     })
+  (rwname,
+   let open Dispatch1 in {
+     srctype = srctype
+   ; dsttype = dsttype
+   ; raw_dstmodule = None
+   ; dstmodule = longid_of_dstmodule dsttype None
+   ; inherit_code = inherit_code
+   ; code = None
+   ; custom_branches_code = None
+   ; custom_branches = []
+   ; custom_fields_code = []
+   ; skip_fields = []
+   ; subs = subs
+   ; type_vars = compute_type_vars srctype dsttype subs
+   ; subs_types = compute_subs_types loc subs
+   })
 ;
 
 value build_default_dispatchers loc type_decls dd =
- let types = dd.Params.Migrate.types in
- let inherit_code = dd.Params.Migrate.inherit_code in
+ let types = dd.types in
+ let inherit_code = dd.inherit_code in
   if not (Std.subset (List.map fst inherit_code) types) then
     let extras = Std.subtract (List.map fst inherit_code) types in
     Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: extra members of inherit_code: %a"
@@ -398,6 +306,54 @@ value build_default_dispatchers loc type_decls dd =
     ]) types
 ;
 
+value compute_dispatchers loc type_decls declared_dispatchers default_dispatchers =
+  let more_dispatchers = List.concat (List.map (build_default_dispatchers loc type_decls)
+                                        default_dispatchers) in
+  List.sort
+    (fun (n1,_) (n2,_) -> Stdlib.compare n1 n2)
+    (declared_dispatchers@more_dispatchers)
+;
+
+type t = {
+  inherit_type : option ctyp
+; dispatch_type_name : lident [@name dispatch_type;]
+; dispatch_table_constructor : lident
+; declared_dispatchers : (alist lident Dispatch1.tyarg_t) [@default [];][@name dispatchers;]
+; default_dispatchers : list default_dispatcher_t [@default [];]
+; dispatchers : (alist lident Dispatch1.tyarg_t) [@computed compute_dispatchers loc type_decls declared_dispatchers default_dispatchers;]
+; type_decls : list (string * MLast.type_decl) [@computed type_decls;]
+; pretty_rewrites : list (string * Prettify.t) [@computed Prettify.mk_from_type_decls type_decls;]
+} [@@deriving params {
+    formal_args = {
+      t = [ type_decls ]
+    }
+  };]
+;
+
+value dispatch_table_type_decls loc t =
+  let ltl = List.map (fun (dispatcher_name, d) ->
+      let ty = Dispatch1.to_type (dispatcher_name, d) in
+      let ty = Prettify.prettify t.pretty_rewrites ty in
+      (loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)
+    ) t.dispatchers in
+  let aux = (loc, "aux", False, <:ctyp< 'aux >>, <:vala< [] >>) in
+  let dispatch_table_type = <:ctyp< { $list:[aux :: ltl]$ } >> in
+  let migrater_type = match t.inherit_type with [
+    None -> <:ctyp< $lid:t.dispatch_type_name$ 'aux -> 'a -> 'b >>
+  | Some inhty -> <:ctyp< $lid:t.dispatch_type_name$ 'aux -> $inhty$ -> 'a -> 'b >>
+  ] in
+  [ <:type_decl< $lid:t.dispatch_type_name$ 'aux = $dispatch_table_type$ >> ;
+    <:type_decl< migrater_t 'aux 'a 'b = $migrater_type$ >> ]
+;
+
+value dispatch_table_expr loc t =
+  let lel = List.map (fun (dispatcher_name, t) ->
+      (<:patt< $lid:dispatcher_name$ >>, <:expr< $lid:dispatcher_name$ >>)
+    ) t.dispatchers in
+  let aux = (<:patt< aux >>, <:expr< aux >>) in
+  <:expr< fun aux -> { $list:[aux :: lel]$ } >>
+;
+
 value build_context loc ctxt tdl =
   let type_decls = List.map (fun (MLast.{tdNam=tdNam} as td) ->
       (tdNam |> uv |> snd |> uv, td)
@@ -405,28 +361,16 @@ value build_context loc ctxt tdl =
   let optarg =
     let l = List.map (fun (k, e) -> (<:patt< $lid:k$ >>, e)) (Ctxt.options ctxt) in
     <:expr< { $list:l$ } >> in
-  let rc0 = Params.Migrate.params type_decls optarg in
-  let dispatchers = List.map (Dispatch1.convert loc type_decls) rc0.Params.Migrate.dispatchers in
-  let more_dispatchers = List.concat (List.map (build_default_dispatchers loc type_decls)
-                                        rc0.Params.Migrate.default_dispatchers) in
-  let dispatchers = List.sort
-      (fun (n1,_) (n2,_) -> Stdlib.compare n1 n2)
-      (dispatchers@more_dispatchers) in
+  let rc = params type_decls optarg in
+  let dispatchers = rc.dispatchers in
+
   let repeated_dispatcher_names = Std2.hash_list_repeats (List.map fst dispatchers) in
   let sorted_repeated_dispatcher_names = List.sort Stdlib.compare repeated_dispatcher_names in
   if [] <> repeated_dispatcher_names then
     Ploc.raise loc (Failure Fmt.(str "pa_deriving.migrate: dispatchers defined more than once: %a"
                                    (list ~{sep=sp} string) sorted_repeated_dispatcher_names))
   else
-  let pretty_rewrites = Prettify.mk_from_type_decls type_decls in
-  {
-    inherit_type = rc0.Params.Migrate.inherit_type ;
-    dispatch_type_name = rc0.Params.Migrate.dispatch_type;
-    dispatch_table_constructor = rc0.Params.Migrate.dispatch_table_constructor;
-    dispatchers = dispatchers ;
-    type_decls = type_decls ;
-    pretty_rewrites = pretty_rewrites
-  }
+   rc
 ;
 
 
@@ -467,7 +411,7 @@ value match_migrate_rule ~{except} t ctyp =
     if (Some dname) = except then None else
      ctyp
      |> (fun r -> pmatch t.Dispatch1.srctype r)
-     |> Std.map_option (fun rho -> (t, rho))
+     |> Std.map_option (fun rho -> ((dname, t), rho))
   ) t.dispatchers
 ;
 
@@ -547,7 +491,7 @@ value rec generate_leaf_dispatcher_expression t d subs_rho = fun [
   <:ctyp:< [ $list:branches$ ] >> ->
   let ll = List.map (fun [
       <:constructor< $uid:uid$ of $list:tyl$ >> ->
-      let custom_branches = Std.filter (fun (n, _) -> uid = n) d.Dispatch1.custom_branches_code in
+      let custom_branches = Std.filter (fun (n, _) -> uid = n) d.Dispatch1.custom_branches in
       if custom_branches <> [] then
         List.map snd custom_branches
       else
@@ -631,7 +575,7 @@ and generate_dispatcher_expression ~{except} t subs_rho ty =
 and generate_tycon_dispatcher_expression ~{except} t subs_rho ty = 
   let loc = loc_of_ctyp ty in
   match match_or_head_reduce loc ~{except=except} t ty with [
-    Left (rwd, lrho) ->
+    Left ((rwdname, rwd), lrho) ->
     (** [rwd] is the migrate dispatcher that matched,
         and [lrho] is the substitution generated by the match. *)
     let (revsubs, rrho) = List.fold_left (fun (revsubs, rrho) (lhsty, rhsty) ->
@@ -643,9 +587,8 @@ and generate_tycon_dispatcher_expression ~{except} t subs_rho ty =
         ] in
         ([ e :: revsubs ], Env.append (loc_of_ctyp ty) rrho add_rrho)
       ) ([], []) rwd.Dispatch1.subs in
-    let dname = rwd.Dispatch1.name in
     let loc = loc_of_ctyp ty in
-    let e = Expr.applist <:expr< __dt__ . $lid:dname$ >> (List.rev revsubs) in
+    let e = Expr.applist <:expr< __dt__ . $lid:rwdname$ >> (List.rev revsubs) in
     let e = abs_dt t (app_dt t e) in
     (e, Ctyp.subst rrho rwd.Dispatch1.dsttype)
 

@@ -2,7 +2,7 @@
 # Copyright (c) INRIA 2007-2017
 
 WD=$(shell pwd)
-TOP=$(WD)/..
+TOP=..
 include $(TOP)/config/Makefile
 
 PACKAGEPREFIX=pa_ppx_
@@ -19,6 +19,16 @@ SYNTAX := camlp5o
 OCAMLCFLAGS += -ppopt -pa_import-I -ppopt . -ppopt -pa_passthru-debug \
 	-ppopt -pa_import-package -ppopt $(PACKAGES) \
 
+ML=\
+	ex_ast.ml ex_migrate.ml test_ex.ml \
+	ex_camlp5.ml ex_map_camlp5.ml test_ex_camlp5.ml \
+
+
+CMO := $(ML:.ml=.cmo)
+CMI := $(ML:.ml=.cmi)
+CMX := $(ML:.ml=.cmx)
+CMT := $(ML:.ml=.cmt)
+CMTI := $(MLI:.mli=.cmti)
 
 TESTS= \
 	test_ex.byte test_ex_camlp5.byte \
@@ -41,12 +51,12 @@ test_ex_camlp5.byte: ex_camlp5.cmo ex_map_camlp5.cmo test_ex_camlp5.cmo
 clean::
 	rm -f  *.ppo.*
 
-EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(ALL_PACKAGES) | grep local-install)
+EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(PACKAGES) | grep local-install)
 $(CMO): $(EXTERNAL)
 
 depend::
 	echo "$(CMO): $(EXTERNAL)" > .depend.NEW
-	$(OCAMLFIND) ocamldep $(DEBUG) $(WARNERR) $(OCAMLCFLAGS) -package $(PACKAGES) -syntax camlp5o \
+	$(OCAMLFIND) ocamldep $(OCAMLCFLAGS) -package $(PACKAGES) -syntax camlp5o \
 	*.ml \
 	>> .depend.NEW
 	mv .depend.NEW .depend

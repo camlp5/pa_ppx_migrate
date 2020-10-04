@@ -15,7 +15,7 @@ EXTRATESTDIRS= pa_ocaml_migrate_parsetree
 
 PACKAGES := pa_ppx.utils,pa_ppx.base,pa_ppx.import,pa_ppx.deriving
 
-all: sys
+all test: sys
 	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) all; cd ..; done
 
 sys: plugins
@@ -31,9 +31,6 @@ doc: all
 
 test-everything: all
 	set -e; for i in $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
-
-test: all
-	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
 
 install: sys
 	$(OCAMLFIND) remove pa_ppx_migrate || true
