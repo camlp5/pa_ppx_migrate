@@ -15,6 +15,81 @@ open Ppxutil ;
 value debug = Pa_passthru.debug ;
 open Pa_ppx_params.Runtime ;
 
+value pmatch pat ty =
+  let rec pmrec acc = fun [
+    (t1, t2) when Reloc.eq_ctyp t1 t2 -> acc
+  | (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
+  | (<:ctyp< $p1$ $p2$ >>, <:ctyp< $t1$ $t2$ >>) ->
+    pmrec (pmrec acc (p1, t1)) (p2, t2)
+  | (<:ctyp< ' $id$ >>, ty) ->
+    if List.mem_assoc id acc then
+      Ploc.raise (loc_of_ctyp pat) (Failure "polymorphic type-variables in patterns must not be repeated")
+    else
+      [ (id, ty) :: acc ]
+  | _ -> failwith "caught"
+  ]
+  in
+  if Reloc.eq_ctyp pat ty then Some []
+  else
+    match pmrec [] (pat, ty) with [
+      rho -> Some rho
+    | exception Failure "caught" -> None
+    ]
+;
+
+module Prettify = struct
+
+type t = {
+  lhs : MLast.ctyp
+; rhs : MLast.ctyp
+}
+;
+
+value mk1 (_, td) =
+    let loc = loc_of_type_decl td in
+  let name = td.tdNam |> uv |> snd |> uv in
+  let vars = List.map (fun [
+      (<:vala< Some v >>, _) -> v
+    | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: unnamed polymorphic type variables" name))
+    ]) (uv td.tdPrm) in
+  let lhs =
+    Ctyp.applist <:ctyp< $lid:name$ >> (List.map (fun s -> <:ctyp< ' $s$ >>) vars) in
+  match td.tdDef with [
+    <:ctyp:< $rhs$ == $_$ >> ->
+    (name, { lhs = lhs ; rhs = rhs })
+  | rhs when not (is_generative_type rhs) ->
+    (name, { lhs = lhs ; rhs = rhs })
+  | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: not a manifest type_decl" name))
+  ]
+;
+
+value mk_from_type_decls tdl =
+  List.fold_right (fun td acc ->
+      match mk1 td with [
+        p -> [p::acc]
+      | exception Ploc.Exc _ _ -> acc
+      ]) tdl []
+;
+
+value prettify rules t =
+  let rec prec t =
+    match (t, List.find_map (fun (_, r) -> t |> pmatch r.lhs |> Std.map_option (fun rho -> (r, rho))) rules) with [
+      (_, Some (r, rho)) ->
+      let rho = List.map (fun (v, subt) -> (v, prec subt)) rho in
+      prec (Ctyp.subst rho r.rhs)
+    | (<:ctyp:< $t1$ $t2$ >>, None) ->
+      <:ctyp< $prec t1$ $prec t2$ >>
+    | (<:ctyp:< $t1$ -> $t2$ >>, None) ->
+      <:ctyp< $prec t1$ -> $prec t2$ >>
+    | (<:ctyp:< ( $list:l$ ) >>, None) ->
+      <:ctyp:< ( $list:List.map prec l$ ) >>
+    | (t, _) -> t
+    ]
+  in prec t
+;
+end
+;
+
 module Params = struct
 
 module Dispatch1 = struct
@@ -45,6 +120,7 @@ type tyarg_t = {
 type t = (alist lident tyarg_t) [@@deriving params;] ;
 end
 ;
+
 module Migrate = struct
 
 type default_dispatcher_t = {
@@ -61,6 +137,7 @@ type t = {
 ; dispatch_table_constructor : lident
 ; dispatchers : Dispatch1.t [@default [];]
 ; default_dispatchers : list default_dispatcher_t [@default [];]
+; type_decls : list (string * MLast.type_decl) [@computed type_decls;]
 } [@@deriving params {
     formal_args = {
       t = [ type_decls ]
@@ -183,81 +260,6 @@ value patt_wrap_dsttype_module d p =
   ]
 ;
 
-end
-;
-
-value pmatch pat ty =
-  let rec pmrec acc = fun [
-    (t1, t2) when Reloc.eq_ctyp t1 t2 -> acc
-  | (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
-  | (<:ctyp< $p1$ $p2$ >>, <:ctyp< $t1$ $t2$ >>) ->
-    pmrec (pmrec acc (p1, t1)) (p2, t2)
-  | (<:ctyp< ' $id$ >>, ty) ->
-    if List.mem_assoc id acc then
-      Ploc.raise (loc_of_ctyp pat) (Failure "polymorphic type-variables in patterns must not be repeated")
-    else
-      [ (id, ty) :: acc ]
-  | _ -> failwith "caught"
-  ]
-  in
-  if Reloc.eq_ctyp pat ty then Some []
-  else
-    match pmrec [] (pat, ty) with [
-      rho -> Some rho
-    | exception Failure "caught" -> None
-    ]
-;
-
-module Prettify = struct
-
-type t = {
-  lhs : MLast.ctyp
-; rhs : MLast.ctyp
-}
-;
-
-value mk1 (_, td) =
-    let loc = loc_of_type_decl td in
-  let name = td.tdNam |> uv |> snd |> uv in
-  let vars = List.map (fun [
-      (<:vala< Some v >>, _) -> v
-    | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: unnamed polymorphic type variables" name))
-    ]) (uv td.tdPrm) in
-  let lhs =
-    Ctyp.applist <:ctyp< $lid:name$ >> (List.map (fun s -> <:ctyp< ' $s$ >>) vars) in
-  match td.tdDef with [
-    <:ctyp:< $rhs$ == $_$ >> ->
-    (name, { lhs = lhs ; rhs = rhs })
-  | rhs when not (is_generative_type rhs) ->
-    (name, { lhs = lhs ; rhs = rhs })
-  | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: not a manifest type_decl" name))
-  ]
-;
-
-value mk_from_type_decls tdl =
-  List.fold_right (fun td acc ->
-      match mk1 td with [
-        p -> [p::acc]
-      | exception Ploc.Exc _ _ -> acc
-      ]) tdl []
-;
-
-value prettify rules t =
-  let rec prec t =
-    match (t, List.find_map (fun (_, r) -> t |> pmatch r.lhs |> Std.map_option (fun rho -> (r, rho))) rules) with [
-      (_, Some (r, rho)) ->
-      let rho = List.map (fun (v, subt) -> (v, prec subt)) rho in
-      prec (Ctyp.subst rho r.rhs)
-    | (<:ctyp:< $t1$ $t2$ >>, None) ->
-      <:ctyp< $prec t1$ $prec t2$ >>
-    | (<:ctyp:< $t1$ -> $t2$ >>, None) ->
-      <:ctyp< $prec t1$ -> $prec t2$ >>
-    | (<:ctyp:< ( $list:l$ ) >>, None) ->
-      <:ctyp:< ( $list:List.map prec l$ ) >>
-    | (t, _) -> t
-    ]
-  in prec t
-;
 end
 ;
 module Migrate = struct
