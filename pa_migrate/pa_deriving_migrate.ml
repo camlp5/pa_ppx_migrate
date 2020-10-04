@@ -61,7 +61,11 @@ type t = {
 ; dispatch_table_constructor : lident
 ; dispatchers : Dispatch1.t [@default [];]
 ; default_dispatchers : list default_dispatcher_t [@default [];]
-} [@@deriving params;]
+} [@@deriving params {
+    formal_args = {
+      t = [ type_decls ]
+    }
+  };]
 ;
 
 end
@@ -399,7 +403,7 @@ value build_context loc ctxt tdl =
   let optarg =
     let l = List.map (fun (k, e) -> (<:patt< $lid:k$ >>, e)) (Ctxt.options ctxt) in
     <:expr< { $list:l$ } >> in
-  let rc0 = Params.Migrate.params optarg in
+  let rc0 = Params.Migrate.params type_decls optarg in
   let dispatchers = List.map (Dispatch1.convert loc type_decls) rc0.Params.Migrate.dispatchers in
   let more_dispatchers = List.concat (List.map (build_default_dispatchers loc type_decls)
                                         rc0.Params.Migrate.default_dispatchers) in
