@@ -20,12 +20,13 @@ module Params = struct
 module Dispatch1 = struct
 
 value extract_case_branches = fun [
-  <:expr< fun [ $list:l$ ] >> ->
-    List.map (fun (p,wheno,e) ->
-        match Patt.unapplist p with [
-          (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
-        | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: case-branches must start with a UIDENT")
-        ]) l
+  None -> []
+| Some <:expr< fun [ $list:l$ ] >> ->
+  List.map (fun (p,wheno,e) ->
+      match Patt.unapplist p with [
+        (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
+      | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: case-branches must start with a UIDENT")
+      ]) l
 ]
 ;
 
@@ -35,7 +36,8 @@ type tyarg_t = {
 ; dstmodule : option longid
 ; inherit_code : option expr
 ; code : option expr
-; custom_branches_code : (alist lident case_branch) [@convert ([%typ: expr], extract_case_branches);][@default [];]
+; custom_branches_code : option expr 
+; custom_branches : (alist lident case_branch) [@computed extract_case_branches custom_branches_code;]
 ; custom_fields_code : (alist lident expr) [@default [];]
 ; skip_fields : list lident [@default [];]
 ; subs : list (ctyp * ctyp) [@default [];]
@@ -133,7 +135,7 @@ value convert_tyarg loc type_decls name targ =
   ] in
   let code = targ.Params.Dispatch1.code in
   let inherit_code = targ.Params.Dispatch1.inherit_code in
-  let custom_branches_code = targ.Params.Dispatch1.custom_branches_code in
+  let custom_branches = targ.Params.Dispatch1.custom_branches in
   let custom_fields_code = targ.Params.Dispatch1.custom_fields_code in
   let skip_fields = targ.Params.Dispatch1.skip_fields in
   let subs = targ.Params.Dispatch1.subs in
@@ -146,7 +148,7 @@ value convert_tyarg loc type_decls name targ =
   ; dstmodule = dstmodule
   ; code = code
   ; inherit_code = inherit_code
-  ; custom_branches_code = custom_branches_code
+  ; custom_branches_code = custom_branches
   ; custom_fields_code = custom_fields_code
   ; skip_fields = skip_fields
   ; subs = subs
@@ -366,7 +368,8 @@ value generate_default_dispatcher loc type_decls (tyid,dd) td =
      ; dstmodule = None
      ; inherit_code = inherit_code
      ; code = None
-     ; custom_branches_code = []
+     ; custom_branches_code = None
+     ; custom_branches = []
      ; custom_fields_code = []
      ; skip_fields = []
      ; subs = subs
