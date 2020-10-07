@@ -540,6 +540,9 @@ value rec generate_leaf_dispatcher_expression t d subs_rho = fun [
         ) tyl in
       <:expr< ( $list:el$ ) >> in
     <:expr< fun [ $patt$ -> $expr$ ] >>
+| ty -> Ploc.raise (loc_of_ctyp ty)
+    (Failure Fmt.(str "generate_leaf_dispatcher_expression: unsupported type:@ %a"
+                    Pp_MLast.pp_ctyp ty))
 ]
 
 and generate_dispatcher_expression ~{except} t subs_rho ty = 
