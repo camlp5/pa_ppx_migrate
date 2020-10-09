@@ -3,6 +3,7 @@
 
 RM=rm
 
+NOT_OCAMLFIND=not-ocamlfind
 OCAMLFIND=ocamlfind
 OCAMLTOPLEVEL=ocaml
 CAMLP5LIB=$(shell $(OCAMLFIND) query camlp5)
@@ -14,6 +15,7 @@ PACKAGES=unix,compiler-libs.common,camlp5.extfun
 PACKAGES := $(PACKAGES),camlp5.parser_quotations
 #PACKAGES := $(PACKAGES),camlp5.quotations
 SYNTAX = camlp5r
+PRPACKAGE = camlp5.pr_r
 
 export PERL5LIB := $(TOP):$(PERL5LIB)
 
@@ -23,6 +25,8 @@ top: all
 	$(OCAMLFIND) ocamlc $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -syntax $(SYNTAX) -c $<
 
 .ml.cmo:
+	$(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) -package $(PACKAGES),$(PRPACKAGE) -syntax $(SYNTAX) $< > $*_ppo.ml
+	$(OCAMLFIND) ocamlc $(DEBUG) $(WARNERR) $(OCAMLCFLAGS) -package $(PACKAGES) -syntax $(SYNTAX) -c $*_ppo.ml
 	$(OCAMLFIND) ocamlc $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -syntax $(SYNTAX) -c $<
 
 .ml.cmx:

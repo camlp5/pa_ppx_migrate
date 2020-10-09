@@ -315,7 +315,9 @@ value compute_dispatchers loc type_decls declared_dispatchers default_dispatcher
 ;
 
 type t = {
-  inherit_type : option ctyp
+  optional : bool
+; plugin_name : string
+; inherit_type : option ctyp
 ; dispatch_type_name : lident [@name dispatch_type;]
 ; dispatch_table_constructor : lident
 ; declared_dispatchers : (alist lident Dispatch1.tyarg_t) [@default [];][@name dispatchers;]
