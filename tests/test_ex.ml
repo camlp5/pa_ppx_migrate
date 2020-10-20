@@ -3,6 +3,8 @@ open OUnit2
 open Ex_ast
 open Ex_migrate
 
+let loc0 = Ploc.make_unlined (1,2)
+
 let test_ast1_ast2 ctxt =
   let dt = Migrate_AST1_AST2.make_dt () in
   assert_equal AST2.({ it = C 1 ; extra = 3; new_field = 3 }) 
@@ -10,8 +12,8 @@ let test_ast1_ast2 ctxt =
 
 let test_ast2_ast1 ctxt =
   let dt = Migrate_AST2_AST1.make_dt () in
-  assert_equal AST1.(A("1", [2;3])) 
-    Migrate_AST2_AST1.(dt.migrate_t1 dt AST2.(A(1, [2;3])))
+  assert_equal AST1.(A(loc0, "1", [2;3])) 
+    Migrate_AST2_AST1.(dt.migrate_t1 dt AST2.(A(loc0, 1, [2;3])))
 
 let suite = "test_ex" >::: [
     "test_ast1_ast2"   >:: test_ast1_ast2

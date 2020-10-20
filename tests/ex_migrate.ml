@@ -1,4 +1,6 @@
 
+module Ploc = Ex_ast.Ploc
+
 module Migrate_AST1_AST2 = struct
 
 module SRC = Ex_ast.AST1
@@ -68,6 +70,11 @@ and t4' = [%import: Ex_ast.AST1.t4']
       ; migrate_t4 = {
           srctype = [%typ: t4]
         ; dsttype = [%typ: DST.t4]
+        }
+      ; migrate_loc = {
+          srctype = [%typ: Ploc.t]
+        ; dsttype = [%typ: Ploc.t]
+        ; code = fun __dt__ x -> x
         }
       }
     }
@@ -141,6 +148,11 @@ and t4' = [%import: Ex_ast.AST2.t4']
       ; migrate_t4 = {
           srctype = [%typ: t4]
         ; dsttype = [%typ: DST.t4]
+        }
+      ; migrate_loc = {
+          srctype = [%typ: Ploc.t]
+        ; dsttype = [%typ: Ploc.t]
+        ; code = fun __dt__ x -> x
         }
       }
     }
