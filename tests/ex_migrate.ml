@@ -24,6 +24,7 @@ and t4' = [%import: Ex_ast.AST1.t4']
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
+    ; default_open_recursion = false
     ; default_dispatchers = [
         {
           srcmod = Ex_ast.AST1
@@ -104,6 +105,7 @@ and t4' = [%import: Ex_ast.AST2.t4']
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
+    ; closed_recursion_dispatchers = [ migrate_t1 ]
     ; default_dispatchers = [
         {
           srcmod = Ex_ast.AST2

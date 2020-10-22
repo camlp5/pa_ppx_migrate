@@ -318,6 +318,9 @@ type t = {
   optional : bool
 ; plugin_name : string
 ; inherit_type : option ctyp
+; default_open_recursion : bool [@default True;]
+; open_recursion_dispatchers : list lident [@default [];]
+; closed_recursion_dispatchers : list lident [@default [];]
 ; dispatch_type_name : lident [@name dispatch_type;]
 ; dispatch_table_constructor : lident
 ; declared_dispatchers : (alist lident Dispatch1.tyarg_t) [@default [];][@name dispatchers;]
@@ -329,15 +332,31 @@ type t = {
     formal_args = {
       t = [ type_decls ]
     }
+  ; validator = fun rc ->
+      if rc.default_open_recursion then
+        rc.open_recursion_dispatchers = []
+      else rc.closed_recursion_dispatchers = []
   };]
 ;
 
+value dispatcher_open_recursion rc dname =
+  rc.default_open_recursion || List.mem dname rc.open_recursion_dispatchers
+;
+
+value dispatcher_invocation_expression rc loc dname =
+  if dispatcher_open_recursion rc dname then
+    <:expr< __dt__ . $lid:dname$ >>
+  else <:expr< $lid:dname$ >>
+;
+
 value dispatch_table_type_decls loc t =
-  let ltl = List.map (fun (dispatcher_name, d) ->
+  let ltl = List.concat (List.map (fun (dispatcher_name, d) ->
+    if dispatcher_open_recursion t dispatcher_name then
       let ty = Dispatch1.to_type (dispatcher_name, d) in
       let ty = Prettify.prettify t.pretty_rewrites ty in
-      (loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)
-    ) t.dispatchers in
+      [(loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)]
+    else []
+    ) t.dispatchers) in
   let aux = (loc, "aux", False, <:ctyp< 'aux >>, <:vala< [] >>) in
   let dispatch_table_type = <:ctyp< { $list:[aux :: ltl]$ } >> in
   let migrater_type = match t.inherit_type with [
@@ -348,10 +367,12 @@ value dispatch_table_type_decls loc t =
     <:type_decl< migrater_t 'aux 'a 'b = $migrater_type$ >> ]
 ;
 
-value dispatch_table_expr loc t =
-  let lel = List.map (fun (dispatcher_name, t) ->
-      (<:patt< $lid:dispatcher_name$ >>, <:expr< $lid:dispatcher_name$ >>)
-    ) t.dispatchers in
+value dispatch_table_expr loc rc =
+  let lel = List.concat (List.map (fun (dispatcher_name, t) ->
+    if dispatcher_open_recursion rc dispatcher_name then
+      [(<:patt< $lid:dispatcher_name$ >>, <:expr< $lid:dispatcher_name$ >>)]
+    else []
+    ) rc.dispatchers) in
   let aux = (<:patt< aux >>, <:expr< aux >>) in
   <:expr< fun aux -> { $list:[aux :: lel]$ } >>
 ;
@@ -593,7 +614,8 @@ and generate_tycon_dispatcher_expression ~{except} t subs_rho ty =
         ([ e :: revsubs ], Env.append (loc_of_ctyp ty) rrho add_rrho)
       ) ([], []) rwd.Dispatch1.subs in
     let loc = loc_of_ctyp ty in
-    let e = Expr.applist <:expr< __dt__ . $lid:rwdname$ >> (List.rev revsubs) in
+    let dexp = dispatcher_invocation_expression t loc rwdname in
+    let e = Expr.applist dexp (List.rev revsubs) in
     let e = abs_dt t (app_dt t e) in
     (e, Ctyp.subst rrho rwd.Dispatch1.dsttype)
 
@@ -637,7 +659,7 @@ value str_item_gen_migrate name arg = fun [
         let e = Migrate.toplevel_generate_dispatcher rc (dname, d) in
         (<:patt< $lid:dname$ >>, e, <:vala< [] >>)
       ) rc.Migrate.dispatchers in
-    let si0 = <:str_item< value $list:migrate_dispatcher_decls$ >> in
+    let si0 = <:str_item< value rec $list:migrate_dispatcher_decls$ >> in
     let si1 = <:str_item< value $lid:rc.Migrate.dispatch_table_constructor$ = $dispatch_table_constructor_expression$ >> in
   <:str_item< declare type $list:dispatch_type_decls$ ; $si0$ ; $si1$ ; end >>
 | _ -> assert False ]
@@ -646,7 +668,15 @@ value str_item_gen_migrate name arg = fun [
 Pa_deriving.(Registry.add PI.{
   name = "migrate"
 ; alternates = []
-; options = ["optional"; "default_dispatchers"; "dispatchers"; "dispatch_type"; "dispatch_table_constructor"; "inherit_type"]
+; options = ["optional"
+            ; "default_dispatchers"
+            ; "default_open_recursion"
+            ; "closed_recursion_dispatchers"
+            ; "open_recursion_dispatchers"
+            ; "dispatchers"
+            ; "dispatch_type"
+            ; "dispatch_table_constructor"
+            ; "inherit_type"]
 ; default_options = let loc = Ploc.dummy in [
     ("optional", <:expr< False >>) 
   ; ("default_dispatchers", <:expr< [] >>) 
