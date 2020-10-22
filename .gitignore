@@ -21,3 +21,5 @@ docs
 */.merlin
 */*/.merlin
 */_build
+*.ppo*
+*_ppo*
