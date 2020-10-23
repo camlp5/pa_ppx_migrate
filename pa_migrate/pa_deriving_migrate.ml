@@ -37,6 +37,12 @@ value pmatch pat ty =
     ]
 ;
 
+value type_var_to_type loc = fun [
+      (<:vala< Some v >>, _) -> <:ctyp< ' $v$ >>
+    | _ -> Ploc.raise loc (Failure "type_var_to_type: cannot accept unnamed polymorphic type variable")
+]
+;
+
 module Prettify = struct
 
 type t = {
@@ -48,12 +54,8 @@ type t = {
 value mk1 (_, td) =
     let loc = loc_of_type_decl td in
   let name = td.tdNam |> uv |> snd |> uv in
-  let vars = List.map (fun [
-      (<:vala< Some v >>, _) -> v
-    | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: unnamed polymorphic type variables" name))
-    ]) (uv td.tdPrm) in
   let lhs =
-    Ctyp.applist <:ctyp< $lid:name$ >> (List.map (fun s -> <:ctyp< ' $s$ >>) vars) in
+    Ctyp.applist <:ctyp< $lid:name$ >> (List.map (type_var_to_type loc) (uv td.tdPrm)) in
   match td.tdDef with [
     <:ctyp:< $rhs$ == $_$ >> ->
     (name, { lhs = lhs ; rhs = rhs })
@@ -245,10 +247,10 @@ value fresh_tyv_args suffix ty =
 value generate_dsttype loc (srclid, dstlid) td =
   let ty = match td.tdDef with [
     <:ctyp< $t1$ == $_$ >> -> t1
-  | _ ->
+  | _ -> 
     let tname = td.tdNam |> uv |> snd |> uv in
     let loc = loc_of_ctyp td.tdDef in
-    <:ctyp< $longid:srclid$ . $lid:tname$ >>
+    Ctyp.applist <:ctyp< $longid:srclid$ . $lid:tname$ >> (List.map (type_var_to_type loc) (uv td.tdPrm))
   ] in
   must_subst_lid_in_ctyp (srclid, dstlid) ty
 ;
@@ -332,10 +334,13 @@ type t = {
     formal_args = {
       t = [ type_decls ]
     }
-  ; validator = fun rc ->
+  ; validators = { t = fun rc ->
       if rc.default_open_recursion then
-        rc.open_recursion_dispatchers = []
-      else rc.closed_recursion_dispatchers = []
+        if rc.open_recursion_dispatchers = [] then Result.Ok True
+        else Result.Error "when default_open_recursion is true, open_recursion_dispatchers should be []"
+      else if rc.closed_recursion_dispatchers = [] then Result.Ok True
+      else Result.Error "when default_open_recursion is false, closed_recursion_dispatchers should be []"
+    }
   };]
 ;
 
@@ -397,7 +402,7 @@ value build_context loc ctxt tdl =
 ;
 
 
-value reduce1 (id, tyargs) td = do {
+value reduce1 ((id: string), tyargs) td = do {
   if List.length tyargs <> List.length (uv td.tdPrm) then
     Ploc.raise (loc_of_type_decl td) (Failure "actual/formal length mismatch")
   else () ;
@@ -510,7 +515,12 @@ value abs_dt t e =
   ]
 ;
 
-value rec generate_leaf_dispatcher_expression t d subs_rho = fun [
+value rec generate_leaf_dispatcher_expression t d subs_rho ty =
+  if AList.mem ~{cmp=Reloc.eq_ctyp} ty subs_rho then
+    let (f_sub, f_result_ty) = AList.assoc ~{cmp=Reloc.eq_ctyp} ty subs_rho in
+    let loc = loc_of_ctyp ty in
+    app_dt t <:expr< $lid:f_sub$ >>
+  else match ty with [
   <:ctyp:< [ $list:branches$ ] >> ->
   let ll = List.map (fun [
       <:constructor< $uid:uid$ of $list:tyl$ >> ->
