@@ -2,7 +2,7 @@
 pa_ppx_migrate Version 0.07
 -------------------
 
-* added support for closed recursion (so, no entries for some types in
+* [27 Oct 2020] added support for closed recursion (so, no entries for some types in
   dispatch table)
 
 * switch to using pa_ppx.deriving_plugins.params for param-parsing
