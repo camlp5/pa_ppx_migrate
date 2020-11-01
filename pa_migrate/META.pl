@@ -22,6 +22,5 @@ description = "pa_ppx_migrate deriver"
   requires(byte) = "camlp5,pa_ppx.deriving.link"
   archive(byte) = "pa_deriving_migrate.cmo"
   )
-  requires = "camlp5,pa_ppx.deriving,pa_ppx.runtime,pa_ppx.params_runtime"
 
 EOF
