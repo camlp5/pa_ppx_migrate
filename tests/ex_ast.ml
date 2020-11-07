@@ -27,3 +27,11 @@ type 'a pt3 = { it : 'a ; extra : int ; new_field : int }
 type t4 = t2 pt3
 type t4' = t2 pt3
 end
+
+module AST3 = struct
+type t1 = A of int list * float list
+end
+
+module AST4 = struct
+type t1 = A of int list * float list
+end

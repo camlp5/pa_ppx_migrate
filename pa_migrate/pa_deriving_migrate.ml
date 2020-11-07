@@ -354,14 +354,18 @@ value dispatcher_invocation_expression rc loc dname =
   else <:expr< $lid:dname$ >>
 ;
 
+value dispatcher_type loc t (dname, d) =
+  let ty = Dispatch1.to_type (dname, d) in
+  Prettify.prettify t.pretty_rewrites ty
+;
+
 value dispatch_table_type_decls loc t =
-  let ltl = List.concat (List.map (fun (dispatcher_name, d) ->
+  let ltl = t.dispatchers |> List.filter_map (fun (dispatcher_name, d) ->
     if dispatcher_open_recursion t dispatcher_name then
-      let ty = Dispatch1.to_type (dispatcher_name, d) in
-      let ty = Prettify.prettify t.pretty_rewrites ty in
-      [(loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)]
-    else []
-    ) t.dispatchers) in
+      let ty = dispatcher_type loc t (dispatcher_name, d) in
+      Some (loc_of_ctyp ty, dispatcher_name, False, ty, <:vala< [] >>)
+    else None
+  ) in
   let aux = (loc, "aux", False, <:ctyp< 'aux >>, <:vala< [] >>) in
   let dispatch_table_type = <:ctyp< { $list:[aux :: ltl]$ } >> in
   let migrater_type = match t.inherit_type with [
@@ -651,7 +655,7 @@ value toplevel_generate_dispatcher t (dname,d) = do {
     let srctype = d.Dispatch1.srctype in
     let loc = loc_of_ctyp srctype in
     let subs_rho = List.mapi (fun i (lhsty, rhsty) -> (lhsty, (Printf.sprintf "__subrw_%d" i, rhsty))) d.Dispatch1.subs in
-    let subs_binders = List.map2 (fun (_,(v, _)) ty -> <:patt< ( $lid:v$ : $ty$ ) >>) subs_rho d.Dispatch1.subs_types in
+    let subs_binders = List.map2 (fun (_,(v, _)) ty -> <:patt< $lid:v$ >>) subs_rho d.Dispatch1.subs_types in
     let (e, t) = generate_dispatcher_expression ~{except=Some dname} t subs_rho srctype in
     let loc = loc_of_expr e in
     List.fold_right (fun p rhs -> <:expr< fun $p$ -> $rhs$ >>) subs_binders e
@@ -667,7 +671,8 @@ value str_item_gen_migrate name arg = fun [
     let dispatch_table_constructor_expression = Migrate.dispatch_table_expr loc rc in
     let migrate_dispatcher_decls = List.map (fun (dname,d) ->
         let e = Migrate.toplevel_generate_dispatcher rc (dname, d) in
-        (<:patt< $lid:dname$ >>, e, <:vala< [] >>)
+        let ety = Migrate.dispatcher_type loc rc (dname, d) in
+        (<:patt< ($lid:dname$ : $ety$ ) >>, e, <:vala< [] >>)
       ) rc.Migrate.dispatchers in
     let si0 = <:str_item< value rec $list:migrate_dispatcher_decls$ >> in
     let si1 = <:str_item< value $lid:rc.Migrate.dispatch_table_constructor$ = $dispatch_table_constructor_expression$ >> in
