@@ -19,8 +19,9 @@ description = "pa_ppx_migrate deriver"
     archive(syntax,preprocessor,native) = "pa_deriving_migrate.cmx"
 
   package "link" (
-  requires(byte) = "camlp5,pa_ppx.deriving.link"
+  requires = "camlp5,pa_ppx.deriving.link"
   archive(byte) = "pa_deriving_migrate.cmo"
+  archive(native) = "pa_deriving_migrate.cmx"
   )
 
 EOF
