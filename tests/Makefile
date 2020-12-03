@@ -52,10 +52,9 @@ clean::
 	rm -f  *.ppo.*
 
 EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(PACKAGES) | grep local-install)
-$(CMO): $(EXTERNAL)
 
 depend::
-	echo "$(CMO): $(EXTERNAL)" > .depend.NEW
+	echo "$(CMO) $(CMI) $(CMX): $(EXTERNAL)" > .depend.NEW
 	$(OCAMLFIND) ocamldep $(OCAMLCFLAGS) -package $(PACKAGES) -syntax camlp5o \
 	*.ml \
 	>> .depend.NEW
