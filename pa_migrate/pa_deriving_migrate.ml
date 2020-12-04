@@ -485,14 +485,15 @@ value canon_ctyp ty = Reloc.ctyp (fun _ -> Ploc.dummy) 0 ty ;
 value builtin_copy_types =
   let loc = Ploc.dummy in
   List.map canon_ctyp [
-    <:ctyp< string >>
+    <:ctyp< bool >>
+  ; <:ctyp< char >>
+  ; <:ctyp< float >>
   ; <:ctyp< int >>
   ; <:ctyp< int32 >>
   ; <:ctyp< int64 >>
   ; <:ctyp< nativeint >>
-  ; <:ctyp< float >>
-  ; <:ctyp< bool >>
-  ; <:ctyp< char >>
+  ; <:ctyp< string >>
+  ; <:ctyp< unit >>
   ]
 ;
 value id_expr t =

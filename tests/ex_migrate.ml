@@ -21,6 +21,7 @@ and t2 = [%import: Ex_ast.AST1.t2]
 and 'a pt3 = [%import: 'a Ex_ast.AST1.pt3]
 and t4 = [%import: Ex_ast.AST1.t4]
 and t4' = [%import: Ex_ast.AST1.t4']
+and t5 = [%import: Ex_ast.AST1.t5]
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
@@ -33,6 +34,7 @@ and t4' = [%import: Ex_ast.AST1.t4']
             t1
           ; pt2
           ; t4'
+          ; t5
           ]
         }
       ]
