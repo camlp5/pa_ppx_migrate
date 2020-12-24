@@ -14,7 +14,7 @@ LAUNCH=env TOP=$(TOP) $(TOP)/tools/LAUNCH
 OCAMLFIND=$(LAUNCH) ocamlfind
 NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
 MKCAMLP5=$(LAUNCH) mkcamlp5
-PACKAGES := $(PACKAGES),ounit2,fmt,pcre,rresult,compiler-libs.common,sexplib,uint,pa_ppx.utils,pa_ppx.testutils,pa_ppx.import,pa_ppx_migrate,camlp5.pa_r.link,pa_ppx.base.link
+PACKAGES := $(PACKAGES),oUnit,fmt,pcre,rresult,compiler-libs.common,sexplib0,uint,pa_ppx.utils,pa_ppx.testutils,pa_ppx.import,pa_ppx_migrate,camlp5.pa_r.link,pa_ppx.base.link
 SYNTAX := camlp5o
 OCAMLCFLAGS += -ppopt -pa_import-I -ppopt . -ppopt -pa_passthru-debug \
 	-ppopt -pa_import-package -ppopt $(PACKAGES) \

@@ -38,3 +38,7 @@ end
 module Ast_4_11 = struct
 #include "gen/ast_4_11.ml"
 end
+
+module Ast_4_12 = struct
+#include "gen/ast_4_12.ml"
+end

@@ -10,6 +10,14 @@ module Lexing = struct
                   Lexing.position] 
 end
 
+# 9 "ast.ORIG.ml"
+module Warnings = struct
+[%%import: 
+# 10 "ast.ORIG.ml"
+             
+# 10 "ast.ORIG.ml"
+                  Warnings.loc] 
+end
 
 # 14 "ast.ORIG.ml"
 module Location = struct
@@ -37,6 +45,12 @@ module Asttypes = struct
              
 # 22 "ast.ORIG.ml"
                   Asttypes.loc] 
+# 24 "ast.ORIG.ml"
+[%%import: 
+# 24 "ast.ORIG.ml"
+             
+# 24 "ast.ORIG.ml"
+                  Asttypes.arg_label] 
 # 26 "ast.ORIG.ml"
 [%%import: 
 # 26 "ast.ORIG.ml"
@@ -83,16 +97,22 @@ module Asttypes = struct
              
 # 34 "ast.ORIG.ml"
                   Asttypes.variance] 
-# 39 "ast.ORIG.ml"
+# 36 "ast.ORIG.ml"
 [%%import: 
-# 39 "ast.ORIG.ml"
+# 36 "ast.ORIG.ml"
              
-# 39 "ast.ORIG.ml"
-                  Asttypes.constant] 
+# 36 "ast.ORIG.ml"
+                  Asttypes.injectivity]
 # 41 "ast.ORIG.ml"
 end
 module Parsetree = struct
 open Asttypes
+# 45 "ast.ORIG.ml"
+[%%import: 
+# 45 "ast.ORIG.ml"
+             
+# 45 "ast.ORIG.ml"
+                  Parsetree.constant] 
 # 47 "ast.ORIG.ml"
 type location_stack = Location.t list 
 [%%import: 
@@ -102,21 +122,53 @@ type location_stack = Location.t list
                   Parsetree.attribute] 
 end
 
+# 52 "ast.ORIG.ml"
+module Type_immediacy = struct
+[%%import: 
+# 53 "ast.ORIG.ml"
+             
+# 53 "ast.ORIG.ml"
+                  Type_immediacy.t] 
+end
 
 # 57 "ast.ORIG.ml"
 module Outcometree = struct
+# 59 "ast.ORIG.ml"
+[%%import: 
+# 59 "ast.ORIG.ml"
+             
+# 59 "ast.ORIG.ml"
+                  Outcometree.out_name] 
 # 61 "ast.ORIG.ml"
 [%%import: 
 # 61 "ast.ORIG.ml"
              
 # 61 "ast.ORIG.ml"
                   Outcometree.out_ident] 
+# 63 "ast.ORIG.ml"
+[%%import: 
+# 63 "ast.ORIG.ml"
+             
+# 63 "ast.ORIG.ml"
+                  Outcometree.out_string] 
+# 66 "ast.ORIG.ml"
+[%%import: 
+# 66 "ast.ORIG.ml"
+             
+# 66 "ast.ORIG.ml"
+                  Outcometree.out_attribute] 
 # 68 "ast.ORIG.ml"
 [%%import: 
 # 68 "ast.ORIG.ml"
              
 # 68 "ast.ORIG.ml"
                   Outcometree.out_value] 
+# 70 "ast.ORIG.ml"
+[%%import: 
+# 70 "ast.ORIG.ml"
+             
+# 70 "ast.ORIG.ml"
+                  Outcometree.out_type_param]
 # 72 "ast.ORIG.ml"
 [%%import: 
 # 72 "ast.ORIG.ml"

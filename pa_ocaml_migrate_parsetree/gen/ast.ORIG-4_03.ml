@@ -89,64 +89,65 @@ module Asttypes = struct
              
 # 34 "ast.ORIG.ml"
                   Asttypes.variance] 
-# 38 "ast.ORIG.ml"
+# 41 "ast.ORIG.ml"
 end
 module Parsetree = struct
 open Asttypes
-# 42 "ast.ORIG.ml"
+# 45 "ast.ORIG.ml"
 [%%import: 
-# 42 "ast.ORIG.ml"
+# 45 "ast.ORIG.ml"
              
-# 42 "ast.ORIG.ml"
+# 45 "ast.ORIG.ml"
                   Parsetree.constant] 
-# 44 "ast.ORIG.ml"
+# 47 "ast.ORIG.ml"
 type location_stack = Location.t list 
 [%%import: 
-# 45 "ast.ORIG.ml"
+# 48 "ast.ORIG.ml"
              
-# 45 "ast.ORIG.ml"
+# 48 "ast.ORIG.ml"
                   Parsetree.attribute] 
 end
 
 
-# 54 "ast.ORIG.ml"
+# 57 "ast.ORIG.ml"
 module Outcometree = struct
-# 58 "ast.ORIG.ml"
+# 61 "ast.ORIG.ml"
 [%%import: 
-# 58 "ast.ORIG.ml"
+# 61 "ast.ORIG.ml"
              
-# 58 "ast.ORIG.ml"
+# 61 "ast.ORIG.ml"
                   Outcometree.out_ident] 
-# 63 "ast.ORIG.ml"
+# 66 "ast.ORIG.ml"
 [%%import: 
-# 63 "ast.ORIG.ml"
+# 66 "ast.ORIG.ml"
              
-# 63 "ast.ORIG.ml"
+# 66 "ast.ORIG.ml"
                   Outcometree.out_attribute] 
-# 65 "ast.ORIG.ml"
+# 68 "ast.ORIG.ml"
 [%%import: 
-# 65 "ast.ORIG.ml"
+# 68 "ast.ORIG.ml"
              
-# 65 "ast.ORIG.ml"
+# 68 "ast.ORIG.ml"
                   Outcometree.out_value] 
+# 72 "ast.ORIG.ml"
 [%%import: 
-# 66 "ast.ORIG.ml"
+# 72 "ast.ORIG.ml"
              
-# 66 "ast.ORIG.ml"
+# 72 "ast.ORIG.ml"
                   Outcometree.out_type] 
 [%%import: 
-# 67 "ast.ORIG.ml"
+# 73 "ast.ORIG.ml"
              
-# 67 "ast.ORIG.ml"
+# 73 "ast.ORIG.ml"
                   Outcometree.out_class_type] 
 [%%import: 
-# 68 "ast.ORIG.ml"
+# 74 "ast.ORIG.ml"
              
-# 68 "ast.ORIG.ml"
+# 74 "ast.ORIG.ml"
                   Outcometree.out_module_type] 
 [%%import: 
-# 69 "ast.ORIG.ml"
+# 75 "ast.ORIG.ml"
              
-# 69 "ast.ORIG.ml"
+# 75 "ast.ORIG.ml"
                   Outcometree.out_phrase] 
 end

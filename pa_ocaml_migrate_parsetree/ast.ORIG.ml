@@ -32,6 +32,9 @@ module Asttypes = struct
 [%%import: PREFIX Asttypes.virtual_flag] 
 [%%import: PREFIX Asttypes.override_flag] 
 [%%import: PREFIX Asttypes.variance] 
+#if MAJOR_VERSION = 4 && MINOR_VERSION >= 12
+[%%import: PREFIX Asttypes.injectivity]
+#endif
 #if MAJOR_VERSION = 4 && MINOR_VERSION < 3
 [%%import: PREFIX Asttypes.constant] 
 #endif
@@ -63,6 +66,9 @@ module Outcometree = struct
 [%%import: PREFIX Outcometree.out_attribute] 
 #endif
 [%%import: PREFIX Outcometree.out_value] 
+#if MAJOR_VERSION = 4 && MINOR_VERSION >= 12
+[%%import: PREFIX Outcometree.out_type_param]
+#endif
 [%%import: PREFIX Outcometree.out_type] 
 [%%import: PREFIX Outcometree.out_class_type] 
 [%%import: PREFIX Outcometree.out_module_type] 

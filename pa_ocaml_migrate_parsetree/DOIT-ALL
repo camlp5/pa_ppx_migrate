@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 rm -rf gen/*
 for v in \
@@ -17,3 +17,4 @@ for v in \
     ./DOIT 4 $v
     done
 
+./DOIT 4 12 ~alpha3
