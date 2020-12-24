@@ -1,6 +1,6 @@
 
-module SRC = All_ast.Ast_4_11
-module DST = All_ast.Ast_4_12
+module SRC = All_ast.Ast_4_12
+module DST = All_ast.Ast_4_11
 
 let src_loc_none =
   let open SRC.Lexing in
@@ -45,48 +45,49 @@ let migration_error location feature =
 let _migrate_list subrw0 __dt__ __inh__ l =
   List.map (subrw0 __dt__ __inh__) l
 
-type lexing_position = [%import: All_ast.Ast_4_11.Lexing.position]
-and location_t = [%import: All_ast.Ast_4_11.Location.t
+type lexing_position = [%import: All_ast.Ast_4_12.Lexing.position]
+and location_t = [%import: All_ast.Ast_4_12.Location.t
     [@with Lexing.position := lexing_position]
 ]
-and 'a location_loc = [%import: 'a All_ast.Ast_4_11.Location.loc
+and 'a location_loc = [%import: 'a All_ast.Ast_4_12.Location.loc
     [@with t := location_t]
 ]
-and longident_t = [%import: All_ast.Ast_4_11.Longident.t
+and longident_t = [%import: All_ast.Ast_4_12.Longident.t
     [@with t := longident_t]
 ]
 
-and label = [%import: All_ast.Ast_4_11.Asttypes.label]
-and arg_label = [%import: All_ast.Ast_4_11.Asttypes.arg_label]
+and label = [%import: All_ast.Ast_4_12.Asttypes.label]
+and arg_label = [%import: All_ast.Ast_4_12.Asttypes.arg_label]
 
-and closed_flag =  [%import: All_ast.Ast_4_11.Asttypes.closed_flag]
-and rec_flag =  [%import: All_ast.Ast_4_11.Asttypes.rec_flag]
-and direction_flag =  [%import: All_ast.Ast_4_11.Asttypes.direction_flag]
-and private_flag =  [%import: All_ast.Ast_4_11.Asttypes.private_flag]
-and mutable_flag =  [%import: All_ast.Ast_4_11.Asttypes.mutable_flag]
-and virtual_flag =  [%import: All_ast.Ast_4_11.Asttypes.virtual_flag]
-and override_flag =  [%import: All_ast.Ast_4_11.Asttypes.override_flag]
-and variance =  [%import: All_ast.Ast_4_11.Asttypes.variance]
-and constant =  [%import: All_ast.Ast_4_11.Parsetree.constant
+and closed_flag =  [%import: All_ast.Ast_4_12.Asttypes.closed_flag]
+and rec_flag =  [%import: All_ast.Ast_4_12.Asttypes.rec_flag]
+and direction_flag =  [%import: All_ast.Ast_4_12.Asttypes.direction_flag]
+and private_flag =  [%import: All_ast.Ast_4_12.Asttypes.private_flag]
+and mutable_flag =  [%import: All_ast.Ast_4_12.Asttypes.mutable_flag]
+and virtual_flag =  [%import: All_ast.Ast_4_12.Asttypes.virtual_flag]
+and override_flag =  [%import: All_ast.Ast_4_12.Asttypes.override_flag]
+and variance =  [%import: All_ast.Ast_4_12.Asttypes.variance]
+and injectivity =  [%import: All_ast.Ast_4_12.Asttypes.injectivity]
+and constant =  [%import: All_ast.Ast_4_12.Parsetree.constant
     [@with Location.t := location_t]
 ]
-and location_stack = [%import: All_ast.Ast_4_11.Parsetree.location_stack
+and location_stack = [%import: All_ast.Ast_4_12.Parsetree.location_stack
     [@with Location.t := location_t]
 ]
-and attribute = [%import: All_ast.Ast_4_11.Parsetree.attribute
+and attribute = [%import: All_ast.Ast_4_12.Parsetree.attribute
     [@with Asttypes.loc := location_loc
          ; Location.t := location_t
     ]
 ]
-and extension = [%import: All_ast.Ast_4_11.Parsetree.extension
+and extension = [%import: All_ast.Ast_4_12.Parsetree.extension
     [@with Asttypes.loc := location_loc]
 ]
-and attributes = [%import: All_ast.Ast_4_11.Parsetree.attributes]
-and payload = [%import: All_ast.Ast_4_11.Parsetree.payload]
-and core_type = [%import: All_ast.Ast_4_11.Parsetree.core_type
+and attributes = [%import: All_ast.Ast_4_12.Parsetree.attributes]
+and payload = [%import: All_ast.Ast_4_12.Parsetree.payload]
+and core_type = [%import: All_ast.Ast_4_12.Parsetree.core_type
     [@with Location.t := location_t]
 ]
-and core_type_desc = [%import: All_ast.Ast_4_11.Parsetree.core_type_desc
+and core_type_desc = [%import: All_ast.Ast_4_12.Parsetree.core_type_desc
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
          ; Asttypes.closed_flag := closed_flag
@@ -94,51 +95,51 @@ and core_type_desc = [%import: All_ast.Ast_4_11.Parsetree.core_type_desc
          ; Asttypes.label := label
     ]
 ]
-and package_type = [%import: All_ast.Ast_4_11.Parsetree.package_type
+and package_type = [%import: All_ast.Ast_4_12.Parsetree.package_type
     [@with Longident.t := longident_t
           ; Asttypes.loc := location_loc
     ]
 ]
-and row_field = [%import: All_ast.Ast_4_11.Parsetree.row_field
+and row_field = [%import: All_ast.Ast_4_12.Parsetree.row_field
     [@with
       Asttypes.label := label
     ; Asttypes.loc := location_loc
     ; Location.t := location_t
     ]
 ]
-and row_field_desc = [%import: All_ast.Ast_4_11.Parsetree.row_field_desc
+and row_field_desc = [%import: All_ast.Ast_4_12.Parsetree.row_field_desc
     [@with
       Asttypes.label := label
     ; Asttypes.loc := location_loc
     ]
 ]
-and object_field = [%import: All_ast.Ast_4_11.Parsetree.object_field
+and object_field = [%import: All_ast.Ast_4_12.Parsetree.object_field
     [@with
       Asttypes.label := label
     ; Asttypes.loc := location_loc
     ; Location.t := location_t
     ]
 ]
-and object_field_desc = [%import: All_ast.Ast_4_11.Parsetree.object_field_desc
+and object_field_desc = [%import: All_ast.Ast_4_12.Parsetree.object_field_desc
     [@with
       Asttypes.label := label
     ; Asttypes.loc := location_loc
     ]
 ]
-and pattern = [%import: All_ast.Ast_4_11.Parsetree.pattern
+and pattern = [%import: All_ast.Ast_4_12.Parsetree.pattern
     [@with Location.t := location_t]
 ]
-and pattern_desc = [%import: All_ast.Ast_4_11.Parsetree.pattern_desc
+and pattern_desc = [%import: All_ast.Ast_4_12.Parsetree.pattern_desc
     [@with Longident.t := longident_t ;
       Asttypes.loc := location_loc ;
       Asttypes.label := label ;
       Asttypes.closed_flag := closed_flag
     ]
 ]
-and expression = [%import: All_ast.Ast_4_11.Parsetree.expression
+and expression = [%import: All_ast.Ast_4_12.Parsetree.expression
     [@with Location.t := location_t]
 ]
-and expression_desc = [%import: All_ast.Ast_4_11.Parsetree.expression_desc
+and expression_desc = [%import: All_ast.Ast_4_12.Parsetree.expression_desc
     [@with Longident.t := longident_t ;
       Asttypes.loc := location_loc ;
       Asttypes.label := label ;
@@ -148,66 +149,66 @@ and expression_desc = [%import: All_ast.Ast_4_11.Parsetree.expression_desc
       Asttypes.direction_flag := direction_flag ;
     ]
 ]
-and case = [%import: All_ast.Ast_4_11.Parsetree.case]
-and letop = [%import: All_ast.Ast_4_11.Parsetree.letop]
-and binding_op = [%import: All_ast.Ast_4_11.Parsetree.binding_op
+and case = [%import: All_ast.Ast_4_12.Parsetree.case]
+and letop = [%import: All_ast.Ast_4_12.Parsetree.letop]
+and binding_op = [%import: All_ast.Ast_4_12.Parsetree.binding_op
     [@with Location.t := location_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and value_description = [%import: All_ast.Ast_4_11.Parsetree.value_description
+and value_description = [%import: All_ast.Ast_4_12.Parsetree.value_description
     [@with Location.t := location_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and type_declaration = [%import: All_ast.Ast_4_11.Parsetree.type_declaration
+and type_declaration = [%import: All_ast.Ast_4_12.Parsetree.type_declaration
     [@with Location.t := location_t
           ; Asttypes.loc := location_loc
           ; Asttypes.variance := variance
           ; Asttypes.private_flag := private_flag
-          ; [%typ: core_type * Asttypes.variance] := core_type_variance
+          ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
-and core_type_variance = SRC.Parsetree.core_type * SRC.Asttypes.variance
-and type_kind = [%import: All_ast.Ast_4_11.Parsetree.type_kind]
-and label_declaration = [%import: All_ast.Ast_4_11.Parsetree.label_declaration
+and variance_injectivity = SRC.Asttypes.variance * SRC.Asttypes.injectivity
+and type_kind = [%import: All_ast.Ast_4_12.Parsetree.type_kind]
+and label_declaration = [%import: All_ast.Ast_4_12.Parsetree.label_declaration
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
          ; Asttypes.mutable_flag := mutable_flag
     ]
 ]
-and constructor_declaration = [%import: All_ast.Ast_4_11.Parsetree.constructor_declaration
+and constructor_declaration = [%import: All_ast.Ast_4_12.Parsetree.constructor_declaration
     [@with Location.t := location_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and constructor_arguments = [%import: All_ast.Ast_4_11.Parsetree.constructor_arguments]
-and type_extension = [%import: All_ast.Ast_4_11.Parsetree.type_extension
+and constructor_arguments = [%import: All_ast.Ast_4_12.Parsetree.constructor_arguments]
+and type_extension = [%import: All_ast.Ast_4_12.Parsetree.type_extension
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
          ; Asttypes.variance := variance
          ; Asttypes.private_flag := private_flag
          ; Location.t := location_t
-         ; [%typ: core_type * Asttypes.variance] := core_type_variance
+         ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
-and extension_constructor = [%import: All_ast.Ast_4_11.Parsetree.extension_constructor
+and extension_constructor = [%import: All_ast.Ast_4_12.Parsetree.extension_constructor
     [@with Location.t := location_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and type_exception = [%import: All_ast.Ast_4_11.Parsetree.type_exception
+and type_exception = [%import: All_ast.Ast_4_12.Parsetree.type_exception
     [@with Location.t := location_t ;]
 ]
-and extension_constructor_kind = [%import: All_ast.Ast_4_11.Parsetree.extension_constructor_kind
+and extension_constructor_kind = [%import: All_ast.Ast_4_12.Parsetree.extension_constructor_kind
     [@with Longident.t := longident_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and class_type = [%import: All_ast.Ast_4_11.Parsetree.class_type
+and class_type = [%import: All_ast.Ast_4_12.Parsetree.class_type
     [@with Location.t := location_t]
 ]
-and class_type_desc = [%import: All_ast.Ast_4_11.Parsetree.class_type_desc
+and class_type_desc = [%import: All_ast.Ast_4_12.Parsetree.class_type_desc
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
          ; Asttypes.label := label
@@ -215,11 +216,11 @@ and class_type_desc = [%import: All_ast.Ast_4_11.Parsetree.class_type_desc
          ; Asttypes.override_flag := override_flag
     ]
 ]
-and class_signature = [%import: All_ast.Ast_4_11.Parsetree.class_signature]
-and class_type_field = [%import: All_ast.Ast_4_11.Parsetree.class_type_field
+and class_signature = [%import: All_ast.Ast_4_12.Parsetree.class_signature]
+and class_type_field = [%import: All_ast.Ast_4_12.Parsetree.class_type_field
     [@with Location.t := location_t]
 ]
-and class_type_field_desc = [%import: All_ast.Ast_4_11.Parsetree.class_type_field_desc
+and class_type_field_desc = [%import: All_ast.Ast_4_12.Parsetree.class_type_field_desc
     [@with
       Asttypes.private_flag := private_flag
     ; Asttypes.mutable_flag := mutable_flag
@@ -228,20 +229,20 @@ and class_type_field_desc = [%import: All_ast.Ast_4_11.Parsetree.class_type_fiel
     ; Asttypes.loc := location_loc
     ]
 ]
-and 'a class_infos = [%import: 'a All_ast.Ast_4_11.Parsetree.class_infos
+and 'a class_infos = [%import: 'a All_ast.Ast_4_12.Parsetree.class_infos
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
          ; Asttypes.variance := variance
          ; Asttypes.virtual_flag := virtual_flag
-         ; [%typ: core_type * Asttypes.variance] := core_type_variance
+         ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
-and class_description = [%import: All_ast.Ast_4_11.Parsetree.class_description]
-and class_type_declaration = [%import: All_ast.Ast_4_11.Parsetree.class_type_declaration]
-and class_expr = [%import: All_ast.Ast_4_11.Parsetree.class_expr
+and class_description = [%import: All_ast.Ast_4_12.Parsetree.class_description]
+and class_type_declaration = [%import: All_ast.Ast_4_12.Parsetree.class_type_declaration]
+and class_expr = [%import: All_ast.Ast_4_12.Parsetree.class_expr
     [@with Location.t := location_t]
 ]
-and class_expr_desc = [%import: All_ast.Ast_4_11.Parsetree.class_expr_desc
+and class_expr_desc = [%import: All_ast.Ast_4_12.Parsetree.class_expr_desc
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
          ; Asttypes.rec_flag := rec_flag
@@ -250,11 +251,11 @@ and class_expr_desc = [%import: All_ast.Ast_4_11.Parsetree.class_expr_desc
          ; Asttypes.override_flag := override_flag
     ]
 ]
-and class_structure = [%import: All_ast.Ast_4_11.Parsetree.class_structure]
-and class_field = [%import: All_ast.Ast_4_11.Parsetree.class_field
+and class_structure = [%import: All_ast.Ast_4_12.Parsetree.class_structure]
+and class_field = [%import: All_ast.Ast_4_12.Parsetree.class_field
     [@with Location.t := location_t]
 ]
-and class_field_desc = [%import: All_ast.Ast_4_11.Parsetree.class_field_desc
+and class_field_desc = [%import: All_ast.Ast_4_12.Parsetree.class_field_desc
     [@with Asttypes.loc := location_loc
          ; Asttypes.override_flag := override_flag
          ; Asttypes.mutable_flag := mutable_flag
@@ -262,129 +263,129 @@ and class_field_desc = [%import: All_ast.Ast_4_11.Parsetree.class_field_desc
          ; Asttypes.label := label
     ]
 ]
-and class_field_kind = [%import: All_ast.Ast_4_11.Parsetree.class_field_kind
+and class_field_kind = [%import: All_ast.Ast_4_12.Parsetree.class_field_kind
     [@with Asttypes.override_flag := override_flag
     ]
 ]
-and class_declaration = [%import: All_ast.Ast_4_11.Parsetree.class_declaration]
-and module_type = [%import: All_ast.Ast_4_11.Parsetree.module_type
+and class_declaration = [%import: All_ast.Ast_4_12.Parsetree.class_declaration]
+and module_type = [%import: All_ast.Ast_4_12.Parsetree.module_type
     [@with Location.t := location_t]
 ]
-and module_type_desc = [%import: All_ast.Ast_4_11.Parsetree.module_type_desc
+and module_type_desc = [%import: All_ast.Ast_4_12.Parsetree.module_type_desc
     [@with Longident.t := longident_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and functor_parameter = [%import: All_ast.Ast_4_11.Parsetree.functor_parameter
+and functor_parameter = [%import: All_ast.Ast_4_12.Parsetree.functor_parameter
     [@with Asttypes.loc := location_loc]
 ]
-and signature = [%import: All_ast.Ast_4_11.Parsetree.signature]
-and signature_item = [%import: All_ast.Ast_4_11.Parsetree.signature_item
+and signature = [%import: All_ast.Ast_4_12.Parsetree.signature]
+and signature_item = [%import: All_ast.Ast_4_12.Parsetree.signature_item
     [@with Location.t := location_t]
 ]
-and signature_item_desc = [%import: All_ast.Ast_4_11.Parsetree.signature_item_desc
+and signature_item_desc = [%import: All_ast.Ast_4_12.Parsetree.signature_item_desc
     [@with Asttypes.rec_flag := rec_flag]
 ]
-and module_declaration = [%import: All_ast.Ast_4_11.Parsetree.module_declaration
+and module_declaration = [%import: All_ast.Ast_4_12.Parsetree.module_declaration
     [@with Location.t := location_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and module_substitution = [%import: All_ast.Ast_4_11.Parsetree.module_substitution
+and module_substitution = [%import: All_ast.Ast_4_12.Parsetree.module_substitution
     [@with Longident.t := longident_t
          ; Location.t := location_t
          ; Asttypes.loc := location_loc
     ]
 ]
-and module_type_declaration = [%import: All_ast.Ast_4_11.Parsetree.module_type_declaration
+and module_type_declaration = [%import: All_ast.Ast_4_12.Parsetree.module_type_declaration
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
     ]
 ]
-and 'a open_infos = [%import: 'a All_ast.Ast_4_11.Parsetree.open_infos
+and 'a open_infos = [%import: 'a All_ast.Ast_4_12.Parsetree.open_infos
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
          ; Asttypes.override_flag := override_flag
     ]
 ]
-and open_description = [%import: All_ast.Ast_4_11.Parsetree.open_description
+and open_description = [%import: All_ast.Ast_4_12.Parsetree.open_description
     [@with Longident.t := longident_t
           ; Asttypes.loc := location_loc
     ]
 ]
-and open_declaration = [%import: All_ast.Ast_4_11.Parsetree.open_declaration]
-and 'a include_infos = [%import: 'a All_ast.Ast_4_11.Parsetree.include_infos
+and open_declaration = [%import: All_ast.Ast_4_12.Parsetree.open_declaration]
+and 'a include_infos = [%import: 'a All_ast.Ast_4_12.Parsetree.include_infos
     [@with Location.t := location_t]
 ]
-and include_description = [%import: All_ast.Ast_4_11.Parsetree.include_description]
-and include_declaration = [%import: All_ast.Ast_4_11.Parsetree.include_declaration]
-and with_constraint = [%import: All_ast.Ast_4_11.Parsetree.with_constraint
+and include_description = [%import: All_ast.Ast_4_12.Parsetree.include_description]
+and include_declaration = [%import: All_ast.Ast_4_12.Parsetree.include_declaration]
+and with_constraint = [%import: All_ast.Ast_4_12.Parsetree.with_constraint
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
     ]
 ]
-and module_expr = [%import: All_ast.Ast_4_11.Parsetree.module_expr
+and module_expr = [%import: All_ast.Ast_4_12.Parsetree.module_expr
     [@with Location.t := location_t]
 ]
-and module_expr_desc = [%import: All_ast.Ast_4_11.Parsetree.module_expr_desc
+and module_expr_desc = [%import: All_ast.Ast_4_12.Parsetree.module_expr_desc
     [@with Longident.t := longident_t ;
            Asttypes.loc := location_loc
     ]
 ]
-and structure = [%import: All_ast.Ast_4_11.Parsetree.structure]
-and structure_item = [%import: All_ast.Ast_4_11.Parsetree.structure_item
+and structure = [%import: All_ast.Ast_4_12.Parsetree.structure]
+and structure_item = [%import: All_ast.Ast_4_12.Parsetree.structure_item
     [@with Location.t := location_t]
 ]
-and structure_item_desc = [%import: All_ast.Ast_4_11.Parsetree.structure_item_desc
+and structure_item_desc = [%import: All_ast.Ast_4_12.Parsetree.structure_item_desc
     [@with Location.t := location_t
           ; Longident.t := longident_t
           ; Asttypes.loc := location_loc
           ; Asttypes.rec_flag := rec_flag
     ]
 ]
-and value_binding = [%import: All_ast.Ast_4_11.Parsetree.value_binding
+and value_binding = [%import: All_ast.Ast_4_12.Parsetree.value_binding
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
     ]
 ]
-and module_binding = [%import: All_ast.Ast_4_11.Parsetree.module_binding
+and module_binding = [%import: All_ast.Ast_4_12.Parsetree.module_binding
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
     ]
 ]
-and type_immediacy_t = [%import: All_ast.Ast_4_11.Type_immediacy.t]
-and out_name = [%import: All_ast.Ast_4_11.Outcometree.out_name]
-and out_ident = [%import: All_ast.Ast_4_11.Outcometree.out_ident]
-and out_string = [%import: All_ast.Ast_4_11.Outcometree.out_string]
-and out_attribute = [%import: All_ast.Ast_4_11.Outcometree.out_attribute]
-and out_value = [%import: All_ast.Ast_4_11.Outcometree.out_value]
-and out_type = [%import: All_ast.Ast_4_11.Outcometree.out_type]
-and out_variant = [%import: All_ast.Ast_4_11.Outcometree.out_variant]
-and out_class_type = [%import: All_ast.Ast_4_11.Outcometree.out_class_type]
-and out_class_sig_item = [%import: All_ast.Ast_4_11.Outcometree.out_class_sig_item]
-and out_module_type = [%import: All_ast.Ast_4_11.Outcometree.out_module_type]
-and out_sig_item = [%import: All_ast.Ast_4_11.Outcometree.out_sig_item
-  [@with
-    [%typ: string * (bool * bool)] := out_type_param
-  ]
+and type_immediacy_t = [%import: All_ast.Ast_4_12.Type_immediacy.t]
+and out_name = [%import: All_ast.Ast_4_12.Outcometree.out_name]
+and out_ident = [%import: All_ast.Ast_4_12.Outcometree.out_ident]
+and out_string = [%import: All_ast.Ast_4_12.Outcometree.out_string]
+and out_attribute = [%import: All_ast.Ast_4_12.Outcometree.out_attribute]
+and out_value = [%import: All_ast.Ast_4_12.Outcometree.out_value]
+and out_type = [%import: All_ast.Ast_4_12.Outcometree.out_type]
+and out_variant = [%import: All_ast.Ast_4_12.Outcometree.out_variant]
+and out_class_type = [%import: All_ast.Ast_4_12.Outcometree.out_class_type]
+and out_class_sig_item = [%import: All_ast.Ast_4_12.Outcometree.out_class_sig_item]
+and out_module_type = [%import: All_ast.Ast_4_12.Outcometree.out_module_type]
+and out_sig_item = [%import: All_ast.Ast_4_12.Outcometree.out_sig_item]
+and out_type_param = [%import: All_ast.Ast_4_12.Outcometree.out_type_param
+    [@with
+       Asttypes.variance := variance
+     ; Asttypes.injectivity := injectivity
+    ]
 ]
-and out_type_param = string * (bool * bool)
-and out_type_decl = [%import: All_ast.Ast_4_11.Outcometree.out_type_decl
+and out_type_decl = [%import: All_ast.Ast_4_12.Outcometree.out_type_decl
     [@with Asttypes.private_flag := private_flag
         ; Type_immediacy.t := type_immediacy_t
-        ; [%typ: string * (bool * bool)] := out_type_param
     ]
 ]
-and out_extension_constructor = [%import: All_ast.Ast_4_11.Outcometree.out_extension_constructor
+and out_extension_constructor = [%import: All_ast.Ast_4_12.Outcometree.out_extension_constructor
     [@with Asttypes.private_flag := private_flag]
 ]
-and out_type_extension = [%import: All_ast.Ast_4_11.Outcometree.out_type_extension
+and out_type_extension = [%import: All_ast.Ast_4_12.Outcometree.out_type_extension
     [@with Asttypes.private_flag := private_flag]
 ]
-and out_val_decl = [%import: All_ast.Ast_4_11.Outcometree.out_val_decl]
-and out_rec_status = [%import: All_ast.Ast_4_11.Outcometree.out_rec_status]
-and out_ext_status = [%import: All_ast.Ast_4_11.Outcometree.out_ext_status]
-and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
+and out_val_decl = [%import: All_ast.Ast_4_12.Outcometree.out_val_decl]
+and out_rec_status = [%import: All_ast.Ast_4_12.Outcometree.out_rec_status]
+and out_ext_status = [%import: All_ast.Ast_4_12.Outcometree.out_ext_status]
+and out_phrase = [%import: All_ast.Ast_4_12.Outcometree.out_phrase]
 
 
 [@@deriving migrate
@@ -393,7 +394,7 @@ and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_11
+          srcmod = All_ast.Ast_4_12
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -403,7 +404,7 @@ and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_11.Asttypes
+        srcmod = All_ast.Ast_4_12.Asttypes
       ; dstmod = DST.Asttypes
       ; types = [
           arg_label
@@ -418,7 +419,7 @@ and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_11.Parsetree
+        srcmod = All_ast.Ast_4_12.Parsetree
       ; dstmod = DST.Parsetree
       ; types = [
           attribute
@@ -506,7 +507,7 @@ and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_11.Outcometree
+        srcmod = All_ast.Ast_4_12.Outcometree
             ; dstmod = DST.Outcometree
                   ; types = [
           out_attribute
@@ -551,23 +552,23 @@ and out_phrase = [%import: All_ast.Ast_4_11.Outcometree.out_phrase]
           srctype = [%typ: variance]
         ; dsttype = [%typ: DST.Asttypes.variance]
         ; custom_branches_code = function
-            Invariant -> NoVariance
+            NoVariance -> Invariant
         }
-      ; migrate_core_type_variance = {
-          srctype = [%typ: core_type_variance]
-        ; dsttype = [%typ: DST.Parsetree.core_type * (DST.Asttypes.variance * DST.Asttypes.injectivity)]
-        ; code = fun __dt__ __inh__ (ty, v) ->
-            (__dt__.migrate_core_type __dt__ __inh__ ty,
-             (__dt__.migrate_variance __dt__ __inh__ v,
-              DST.Asttypes.NoInjectivity))
+      ; migrate_variance_injectivity = {
+          srctype = [%typ: variance_injectivity]
+        ; dsttype = [%typ: DST.Asttypes.variance]
+        ; code = fun __dt__ __inh__ (v, _) ->
+            __dt__.migrate_variance __dt__ __inh__ v
         }
       ; migrate_out_type_param = {
           srctype = [%typ: out_type_param]
-        ; dsttype = [%typ: DST.Outcometree.out_type_param]
-        ; code = fun __dt__ __inh__ (s, (co, cn)) ->
+        ; dsttype = [%typ: string * (bool * bool)]
+        ; code = fun __dt__ __inh__ (s, (var, inj)) ->
             (s,
-             ((if not cn then DST.Asttypes.Covariant else if not co then DST.Asttypes.Contravariant else DST.Asttypes.NoVariance),
-              DST.Asttypes.NoInjectivity))
+             match var with
+               Covariant -> (true, false)
+             | Contravariant -> (false, true)
+             | _ -> (true, true))
         }
       ; migrate_printer = {
           srctype = [%typ: (Format.formatter -> unit)]

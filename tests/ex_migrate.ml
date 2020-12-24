@@ -15,7 +15,10 @@ let _migrate_list subrw0 __dt__ l =
   List.map (subrw0 __dt__) l
 
 type t0 = [%import: Ex_ast.AST1.t0]
-and t1 = [%import: Ex_ast.AST1.t1]
+and t1 = [%import: Ex_ast.AST1.t1
+  [@with [%typ: int * bool] := z1]
+]
+and z1 = int * bool
 and 'a pt2 = [%import: 'a Ex_ast.AST1.pt2]
 and t2 = [%import: Ex_ast.AST1.t2]
 and 'a pt3 = [%import: 'a Ex_ast.AST1.pt3]
@@ -44,6 +47,11 @@ and t5 = [%import: Ex_ast.AST1.t5]
         ; dsttype = [%typ: 'b list]
         ; code = _migrate_list
         ; subs = [ ([%typ: 'a], [%typ: 'b]) ]
+        }
+      ; migrate_z1 = {
+          srctype = [%typ: z1]
+        ; dsttype = [%typ: int * int * bool]
+        ; code = fun __dt__ (n,b) -> (n,n,b)
         }
       ; migrate_t0 = {
           srctype = [%typ: t0]
@@ -98,7 +106,10 @@ let _migrate_list subrw0 __dt__ l =
   List.map (subrw0 __dt__) l
 
 type t0 = [%import: Ex_ast.AST2.t0]
-and t1 = [%import: Ex_ast.AST2.t1]
+and t1 = [%import: Ex_ast.AST2.t1
+  [@with [%typ: int * int * bool] := z1]
+]
+and z1 = int * int * bool
 and 'a pt2 = [%import: 'a Ex_ast.AST2.pt2]
 and t2 = [%import: Ex_ast.AST2.t2]
 and 'a pt3 = [%import: 'a Ex_ast.AST2.pt3]
@@ -125,6 +136,11 @@ and t4' = [%import: Ex_ast.AST2.t4']
         ; dsttype = [%typ: 'b list]
         ; code = _migrate_list
         ; subs = [ ([%typ: 'a], [%typ: 'b]) ]
+        }
+      ; migrate_z1 = {
+          srctype = [%typ: z1]
+        ; dsttype = [%typ: int * bool]
+        ; code = fun __dt__ (n,_,b) -> (n,b)
         }
       ; migrate_t0 = {
           srctype = [%typ: t0]
