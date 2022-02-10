@@ -104,3 +104,23 @@ migrate_411_410.cmo : \
     all_ast.cmo
 migrate_411_410.cmx : \
     all_ast.cmx
+migrate_411_412.cmo : \
+    all_ast.cmo
+migrate_411_412.cmx : \
+    all_ast.cmx
+migrate_412_411.cmo : \
+    all_ast.cmo
+migrate_412_411.cmx : \
+    all_ast.cmx
+migrate_412_413.cmo : \
+    all_ast.cmo
+migrate_412_413.cmx : \
+    all_ast.cmx
+migrate_413_412.cmo : \
+    all_ast.cmo
+migrate_413_412.cmx : \
+    all_ast.cmx
+migrate_414_413.cmo : \
+    all_ast.cmo
+migrate_414_413.cmx : \
+    all_ast.cmx

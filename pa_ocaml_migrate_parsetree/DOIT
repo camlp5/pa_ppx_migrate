@@ -10,11 +10,11 @@ cppo -D PREFIX -D "MAJOR_VERSION ${MAJOR}" -D "MINOR_VERSION ${MINOR}" ast.ORIG.
 ../tools/LAUNCH not-ocamlfind preprocess  -package unix,compiler-libs.common,camlp5.quotations,camlp5.extfun,rresult,fmt,pa_ppx.utils,pa_ppx.runtime,camlp5.macro,camlp5.pr_o,pa_ppx.import,pa_ppx.deriving_plugins.std \
 -syntax camlp5o -ppopt -D -ppopt BOOTSTRAP \
 -ppopt -pa_import-I -ppopt . \
--ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.0-beta4/GENERIC/${VERS}${TAG}/lib/ocaml \
--ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.0-beta4/GENERIC/${VERS}${TAG}/lib/ocaml/compiler-libs \
--ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.0-beta4/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/stdlib \
--ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.0-beta4/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/parsing \
--ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.0-beta4/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/typing \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/lib/ocaml \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/lib/ocaml/compiler-libs \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/stdlib \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/parsing \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/typing \
 -ppopt -sep -ppopt "\n" \
 -ppopt -pa_import-mli-only \
 -ppopt -pa_import-redeclare \

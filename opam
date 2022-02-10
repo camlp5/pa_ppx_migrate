@@ -21,12 +21,12 @@ dev-repo: "git+https://github.com/camlp5/pa_ppx_migrate.git"
 doc: "https://github.com/camlp5/pa_ppx_migrate/doc"
 
 depends: [
-  "ocaml"       { >= "4.10.0" & < "4.14.0" }
+  "ocaml"       { >= "4.10.0" & < "4.15.0" }
   "conf-perl"
   "conf-perl-ipc-system-simple"
   "conf-perl-string-shellquote"
-  "camlp5"      { >= "8.00" }
-  "pa_ppx"      { >= "0.07.02" }
+  "camlp5"      { >= "8.00.03" }
+  "pa_ppx"      { >= "0.09" }
   "not-ocamlfind" { >= "0.01" }
   "pcre" { >= "7.4.3" }
   "ounit" {with-test}
