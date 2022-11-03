@@ -120,6 +120,10 @@ migrate_413_412.cmo : \
     all_ast.cmo
 migrate_413_412.cmx : \
     all_ast.cmx
+migrate_413_414.cmo : \
+    all_ast.cmo
+migrate_413_414.cmx : \
+    all_ast.cmx
 migrate_414_413.cmo : \
     all_ast.cmo
 migrate_414_413.cmx : \

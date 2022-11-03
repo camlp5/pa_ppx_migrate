@@ -35,7 +35,7 @@ ML=all_ast.ml \
 	migrate_410_411.ml migrate_411_410.ml \
 	migrate_411_412.ml migrate_412_411.ml \
 	migrate_412_413.ml migrate_413_412.ml \
-	migrate_414_413.ml \
+	migrate_413_414.ml migrate_414_413.ml \
 
 
 CMO := $(ML:.ml=.cmo)
