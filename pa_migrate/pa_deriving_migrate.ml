@@ -73,9 +73,12 @@ value mk_from_type_decls tdl =
       ]) tdl []
 ;
 
+value find_prettify_match rules t =
+  List.find_map (fun (_, r) -> t |> pmatch r.lhs |> Std.map_option (fun rho -> (r, rho))) rules ;
+
 value prettify rules t =
   let rec prec t =
-    match (t, List.find_map (fun (_, r) -> t |> pmatch r.lhs |> Std.map_option (fun rho -> (r, rho))) rules) with [
+    match (t, find_prettify_match rules t) with [
       (_, Some (r, rho)) ->
       let rho = List.map (fun (v, subt) -> (v, prec subt)) rho in
       prec (Ctyp.subst rho r.rhs)
