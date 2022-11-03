@@ -23,7 +23,8 @@ CMX := $(ML:.ml=.cmx)
 CMT := $(ML:.ml=.cmt)
 CMTI := $(MLI:.mli=.cmti)
 
-all: $(CMO) $(CMX) local-install
+all: $(CMO) $(CMX)
+	$(MAKE) local-install
 
 doc: $(CMT) $(CMTI)
 

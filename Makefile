@@ -45,8 +45,8 @@ uninstall:
 	$(OCAMLFIND) remove pa_ppx_ocaml_migrate_parsetree || true
 
 clean::
-	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done
+	set -e; for i in $(SYSDIRS) $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done
 	rm -rf docs local-install
 
 depend:
-	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) depend; cd ..; done
+	set -e; for i in $(SYSDIRS) $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) depend; cd ..; done
