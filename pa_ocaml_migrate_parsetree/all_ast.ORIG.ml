@@ -50,3 +50,7 @@ end
 module Ast_4_14 = struct
 #include "gen/ast_4_14.ml"
 end
+
+module Ast_5_0 = struct
+#include "gen/ast_5_0.ml"
+end

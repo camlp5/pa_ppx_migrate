@@ -5,7 +5,7 @@ module Lexing = struct
 [%%import: PREFIX Lexing.position] 
 end
 
-#if MAJOR_VERSION = 4 && MINOR_VERSION > 5
+#if (MAJOR_VERSION = 4 && MINOR_VERSION > 5 || MAJOR_VERSION = 5)
 module Warnings = struct
 [%%import: PREFIX Warnings.loc] 
 end
@@ -20,7 +20,7 @@ module Longident = struct
 end
 module Asttypes = struct
 [%%import: PREFIX Asttypes.loc] 
-#if MAJOR_VERSION = 4 && MINOR_VERSION >= 3
+#if (MAJOR_VERSION = 4 && MINOR_VERSION >= 3 || MAJOR_VERSION = 5)
 [%%import: PREFIX Asttypes.arg_label] 
 #endif
 [%%import: PREFIX Asttypes.label] 
@@ -32,7 +32,7 @@ module Asttypes = struct
 [%%import: PREFIX Asttypes.virtual_flag] 
 [%%import: PREFIX Asttypes.override_flag] 
 [%%import: PREFIX Asttypes.variance] 
-#if MAJOR_VERSION = 4 && MINOR_VERSION >= 12
+#if (MAJOR_VERSION = 4 && MINOR_VERSION >= 12 || MAJOR_VERSION = 5)
 [%%import: PREFIX Asttypes.injectivity]
 #endif
 #if MAJOR_VERSION = 4 && MINOR_VERSION < 3
@@ -41,32 +41,32 @@ module Asttypes = struct
 end
 module Parsetree = struct
 open Asttypes
-#if MAJOR_VERSION = 4 && MINOR_VERSION >= 3
+#if (MAJOR_VERSION = 4 && MINOR_VERSION >= 3 || MAJOR_VERSION = 5)
 [%%import: PREFIX Parsetree.constant] 
 #endif
 type location_stack = Location.t list 
 [%%import: PREFIX Parsetree.attribute] 
 end
 
-#if MAJOR_VERSION = 4 && MINOR_VERSION >= 10
+#if (MAJOR_VERSION = 4 && MINOR_VERSION >= 10 || MAJOR_VERSION = 5)
 module Type_immediacy = struct
 [%%import: PREFIX Type_immediacy.t] 
 end
 #endif
 
 module Outcometree = struct
-#if MAJOR_VERSION = 4 && MINOR_VERSION > 7
+#if (MAJOR_VERSION = 4 && MINOR_VERSION > 7 || MAJOR_VERSION = 5)
 [%%import: PREFIX Outcometree.out_name] 
 #endif
 [%%import: PREFIX Outcometree.out_ident] 
-#if MAJOR_VERSION = 4 && MINOR_VERSION > 5
+#if (MAJOR_VERSION = 4 && MINOR_VERSION > 5 || MAJOR_VERSION = 5)
 [%%import: PREFIX Outcometree.out_string] 
 #endif
-#if MAJOR_VERSION = 4 && MINOR_VERSION > 2
+#if (MAJOR_VERSION = 4 && MINOR_VERSION > 2 || MAJOR_VERSION = 5)
 [%%import: PREFIX Outcometree.out_attribute] 
 #endif
 [%%import: PREFIX Outcometree.out_value] 
-#if MAJOR_VERSION = 4 && MINOR_VERSION >= 12
+#if (MAJOR_VERSION = 4 && MINOR_VERSION >= 12 || MAJOR_VERSION = 5)
 [%%import: PREFIX Outcometree.out_type_param]
 #endif
 [%%import: PREFIX Outcometree.out_type] 
