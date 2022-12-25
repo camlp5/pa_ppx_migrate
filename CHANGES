@@ -1,4 +1,11 @@
 
+pa_ppx_migrate Version 0.09
+-------------------
+
+* [25 Dec 2022] update pa_ppx_migrate to support ocaml 5.0.0
+
+  This is mostly just updating the OCaml AST migration example.
+
 pa_ppx_migrate Version 0.08
 -------------------
 
