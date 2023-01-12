@@ -15,8 +15,11 @@ EXTRATESTDIRS= pa_ocaml_migrate_parsetree
 
 PACKAGES := pa_ppx.utils,pa_ppx.base,pa_ppx.import,pa_ppx.deriving
 
-all test: sys
+all: sys
 	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) all; cd ..; done
+
+test: all
+	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
 
 sys: plugins
 
