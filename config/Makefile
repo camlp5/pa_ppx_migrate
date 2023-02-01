@@ -4,6 +4,7 @@
 RM=rm
 
 NOT_OCAMLFIND=not-ocamlfind
+LAUNCH=env TOP=$(TOP) ocamlfind camlp5-buildscripts/LAUNCH --
 OCAMLFIND=ocamlfind
 OCAMLTOPLEVEL=ocaml
 CAMLP5LIB=$(shell $(OCAMLFIND) query camlp5)

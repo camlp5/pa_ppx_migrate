@@ -8,7 +8,6 @@ include $(TOP)/config/Makefile
 DESTDIR=
 RM=rm
 
-LAUNCH=$(TOP)/tools/LAUNCH
 OCAMLFIND=$(LAUNCH) ocamlfind
 NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
 MKCAMLP5=$(LAUNCH) mkcamlp5

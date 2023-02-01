@@ -8,7 +8,6 @@ include $(TOP)/config/Makefile
 DESTDIR=
 RM=rm
 
-LAUNCH=env TOP=$(TOP) $(TOP)/tools/LAUNCH
 OCAMLFIND=$(LAUNCH) ocamlfind
 NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
 MKCAMLP5=$(LAUNCH) mkcamlp5
@@ -33,11 +32,9 @@ KITS=$(CMO)
 META: META.pl
 	./META.pl > META
 
-install::
+install:: META
 	mkdir -p $(DESTDIR)/lib
-	./META.pl $(DESTDIR)/lib > META
 	$(NOT_OCAMLFIND) reinstall-if-diff pa_ppx_migrate -destdir $(DESTDIR)/lib META $(CMO) $(CMI) $(CMX) $(MLI:.mli=.cmi) $(KITS:.cmo=.o) $(wildcard *.cmt*)
-	$(RM) -f META
 
 local-install::
 	$(MAKE) DESTDIR=$(WD)/$(TOP)/local-install/ install
