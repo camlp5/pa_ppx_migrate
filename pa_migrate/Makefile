@@ -30,7 +30,6 @@ KITS=$(CMO)
 
 META: mk_meta
 	./mk_meta > META
-	diff -Bwiu META META.OLD
 
 mk_meta: mk_meta.cmo
 	$(OCAMLFIND) ocamlc -linkpkg -linkall -package fmt $< -o $@
