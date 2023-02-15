@@ -22,14 +22,14 @@ doc: "https://github.com/camlp5/pa_ppx_migrate/doc"
 
 depends: [
   "ocaml"       { >= "4.10.0" & < "5.01.0" }
-  "conf-perl"
   "cppo" { >= "1.6.9" }
   "camlp5-buildscripts" { >= "0.01" }
-  "camlp5"      { >= "8.00.03" }
-  "pa_ppx"      { >= "0.09" }
+  "camlp5"      { >= "8.00.05" }
+  "pa_ppx"      { >= "0.10" }
   "not-ocamlfind" { >= "0.01" }
   "pcre" { >= "7.4.3" }
   "ounit" {with-test}
+  "fmt"
   "bos" { >= "0.2.0" }
 ]
 build: [

@@ -1,3 +1,4 @@
+(** -syntax camlp5o *)
 open OUnit2
 
 open Ex_camlp5

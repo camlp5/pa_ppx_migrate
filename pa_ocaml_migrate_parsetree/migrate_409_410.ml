@@ -1,4 +1,4 @@
-
+(** -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
 module SRC = All_ast.Ast_4_09
 module DST = All_ast.Ast_4_10
 

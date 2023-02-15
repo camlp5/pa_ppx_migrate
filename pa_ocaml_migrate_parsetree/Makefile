@@ -3,19 +3,13 @@
 
 WD=$(shell pwd)
 TOP=..
-include $(TOP)/config/Makefile
+include $(TOP)/config/Makefile.sub
 
 DESTDIR=
-RM=rm
 
-OCAMLFIND=$(LAUNCH) ocamlfind
-NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
-MKCAMLP5=$(LAUNCH) mkcamlp5
 PACKAGES := $(PACKAGES),pa_ppx.base,fmt,bos,pa_ppx.import
 PACKAGES := $(PACKAGES),pa_ppx_migrate
-SYNTAX = camlp5o
-OCAMLCFLAGS += -ppopt -pa_import-I -ppopt .
-OCAMLCFLAGS += -ppopt -pa_passthru-debug 
+export IMPORT_OCAMLCFLAGS += -ppopt -pa_import-I -ppopt . -ppopt -pa_passthru-debug 
 
 TARGET=pa_omp.cma
 ML=all_ast.ml \
@@ -37,28 +31,20 @@ ML=all_ast.ml \
 	migrate_413_414.ml migrate_414_413.ml \
 	migrate_414_500.ml migrate_500_414.ml \
 
+ALLSRC=$(ML)
+ALLPACKAGES=$(PACKAGES)
 
-CMO := $(ML:.ml=.cmo)
-CMI := $(ML:.ml=.cmi)
-CMX := $(ML:.ml=.cmx)
-CMT := $(ML:.ml=.cmt)
-CMTI := $(MLI:.mli=.cmti)
 
 test all: $(TARGET) $(TARGET:.cma=.cmxa) local-install
 
 doc: $(CMT) $(CMTI)
 
-META: META.pl
-	./META.pl > META
-
 all_ast.ml: all_ast.ORIG.ml $(wildcard gen/ast_*.ml) 
 	cppo all_ast.ORIG.ml > all_ast.ml.NEW && mv all_ast.ml.NEW all_ast.ml
 
-install::
-	./META.pl $(DESTDIR)/lib > META
+install:: META
 	mkdir -p $(DESTDIR)/lib
 	$(NOT_OCAMLFIND) reinstall-if-diff pa_ppx_ocaml_migrate_parsetree -destdir $(DESTDIR)/lib META $(TARGET) $(TARGET:.cma=.cmxa) $(TARGET:.cma=.a) $(CMI) $(wildcard *.cmt*)
-	$(RM) -f META
 
 local-install:: $(TARGET) $(TARGET:.cma=.cmxa)
 	$(MAKE) DESTDIR=$(WD)/$(TOP)/local-install/ install
@@ -74,18 +60,3 @@ $(TARGET:.cma=.cmxa): $(CMO:.cmo=.cmx)
 
 $(TARGET): $(CMO)
 $(TARGET:.cma=.cmxa): $(CMO:.cmo=.cmx)
-
-EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(PACKAGES) | grep local-install)
-$(CMO) $(CMI) $(CMX): $(EXTERNAL)
-
-depend::
-	echo "$(CMO) $(CMI) $(CMX): $(EXTERNAL)" > .depend.NEW
-	$(OCAMLFIND) ocamldep $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -syntax camlp5o all_ast.ml migrate_*[0-9].ml *.mli > .depend.NEW \
-		&& mv .depend.NEW .depend
-
--include .depend
-
-.ml.cmo:
-	$(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) -package $(PACKAGES),camlp5.pr_o -syntax $(SYNTAX) $< > $@.ppo.ml
-	$(OCAMLFIND) ocamlc $(OCAMLCFLAGS) -package $(PACKAGES) -syntax $(SYNTAX) -c $@.ppo.ml
-	$(OCAMLFIND) ocamlc $(OCAMLCFLAGS) -package $(PACKAGES) -syntax $(SYNTAX) -c $<
