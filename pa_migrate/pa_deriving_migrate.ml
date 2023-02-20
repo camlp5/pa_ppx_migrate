@@ -7,13 +7,14 @@ open MLast;
 open Pa_ppx_base ;
 open Pa_passthru ;
 open Ppxutil ;
+open Pa_ppx_deriving ;
 open Surveil ;
 open Pa_deriving_base ;
 open Pa_ppx_utils ;
 open Ppxutil ;
 
 value debug = Pa_passthru.debug ;
-open Pa_ppx_params.Runtime ;
+open Pa_ppx_params_runtime.Runtime ;
 
 value pmatch pat ty =
   let rec pmrec acc = fun [
