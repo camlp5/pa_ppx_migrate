@@ -1,4 +1,4 @@
-(** -syntax camlp5r *)
+(**pp -syntax camlp5r *)
 (* pa_deriving_migrate.ml,v *)
 (* Copyright (c) INRIA 2007-2017 *)
 
@@ -451,7 +451,7 @@ value match_migrate_rule ~{except} t ctyp =
   ) t.dispatchers
 ;
 
-(** strategy for generating a migrater.
+(**pp strategy for generating a migrater.
 
 (1) start with srctype
 

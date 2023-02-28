@@ -1,4 +1,4 @@
-(** -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
+(**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
 module Ploc= struct
 include Ploc
 
