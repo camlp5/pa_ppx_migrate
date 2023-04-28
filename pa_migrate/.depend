@@ -1,3 +1,5 @@
 pa_deriving_migrate.cmo pa_deriving_migrate.cmi pa_deriving_migrate.cmx: 
 pa_deriving_migrate.cmo :
 pa_deriving_migrate.cmx :
+mk_meta.cmo :
+mk_meta.cmx :

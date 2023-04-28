@@ -1,33 +1,9 @@
 ex_ast.cmo ex_migrate.cmo test_ex.cmo ex_camlp5.cmo ex_map_camlp5.cmo test_ex_camlp5.cmo ex_ast.cmi ex_migrate.cmi test_ex.cmi ex_camlp5.cmi ex_map_camlp5.cmi test_ex_camlp5.cmi ex_ast.cmx ex_migrate.cmx test_ex.cmx ex_camlp5.cmx ex_map_camlp5.cmx test_ex_camlp5.cmx: ../local-install/lib/pa_ppx_migrate/META
-ex_ast.cmo.ppo.cmo :
-ex_ast.cmo.ppo.cmx :
 ex_ast.cmo :
 ex_ast.cmx :
-ex_camlp5.cmo.ppo.cmo :
-ex_camlp5.cmo.ppo.cmx :
-ex_camlp5.cmo :
-ex_camlp5.cmx :
-ex_map_camlp5.cmo.ppo.cmo : \
-    ex_camlp5.cmo
-ex_map_camlp5.cmo.ppo.cmx : \
-    ex_camlp5.cmx
-ex_map_camlp5.cmo : \
-    ex_camlp5.cmo
-ex_map_camlp5.cmx : \
-    ex_camlp5.cmx
-ex_migrate.cmo.ppo.cmo : \
-    ex_ast.cmo
-ex_migrate.cmo.ppo.cmx : \
-    ex_ast.cmx
 ex_migrate.cmo : \
     ex_ast.cmo
 ex_migrate.cmx : \
-    ex_ast.cmx
-test_ex.cmo.ppo.cmo : \
-    ex_migrate.cmo \
-    ex_ast.cmo
-test_ex.cmo.ppo.cmx : \
-    ex_migrate.cmx \
     ex_ast.cmx
 test_ex.cmo : \
     ex_migrate.cmo \
@@ -35,11 +11,11 @@ test_ex.cmo : \
 test_ex.cmx : \
     ex_migrate.cmx \
     ex_ast.cmx
-test_ex_camlp5.cmo.ppo.cmo : \
-    ex_map_camlp5.cmo \
+ex_camlp5.cmo :
+ex_camlp5.cmx :
+ex_map_camlp5.cmo : \
     ex_camlp5.cmo
-test_ex_camlp5.cmo.ppo.cmx : \
-    ex_map_camlp5.cmx \
+ex_map_camlp5.cmx : \
     ex_camlp5.cmx
 test_ex_camlp5.cmo : \
     ex_map_camlp5.cmo \

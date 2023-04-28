@@ -7,10 +7,9 @@ include $(TOP)/config/Makefile.top
 WD=$(shell pwd)
 DESTDIR=
 
-SYSDIRS= pa_migrate
+SYSDIRS= pa_migrate pa_ocaml_migrate_parsetree
 
 TESTDIRS= tests
-EXTRATESTDIRS= pa_ocaml_migrate_parsetree
 
 PACKAGES := pa_ppx.utils,pa_ppx.base,pa_ppx.import,pa_ppx.deriving
 
@@ -32,7 +31,7 @@ doc: all
 	make -C doc html
 
 test-everything: all
-	set -e; for i in $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
+	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
 
 install: sys
 	$(OCAMLFIND) remove pa_ppx_migrate || true
@@ -47,8 +46,8 @@ uninstall:
 	$(OCAMLFIND) remove pa_ppx_ocaml_migrate_parsetree || true
 
 clean::
-	set -e; for i in $(SYSDIRS) $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done
+	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done
 	rm -rf docs local-install
 
 depend:
-	set -e; for i in $(SYSDIRS) $(TESTDIRS) $(EXTRATESTDIRS); do cd $$i; $(MAKE) depend; cd ..; done
+	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) depend; cd ..; done
