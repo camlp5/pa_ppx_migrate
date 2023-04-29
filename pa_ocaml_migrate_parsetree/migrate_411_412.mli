@@ -2,6 +2,8 @@
 module SRC = All_ast.Ast_4_11
 module DST = All_ast.Ast_4_12
 
+include (sig open Reorg_ast end)
+
 (*
 [%%import: Reorg_ast.Ast_4_11.attribute]
  *)

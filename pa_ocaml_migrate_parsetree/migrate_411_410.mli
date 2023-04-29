@@ -2,6 +2,8 @@
 module SRC = All_ast.Ast_4_11
 module DST = All_ast.Ast_4_10
 
+include (sig open Reorg_ast end)
+
 [%%import: Reorg_ast.Ast_4_11.attribute]
 [@@deriving migrate
     { inherit_type = [%typ: location_t option]

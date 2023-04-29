@@ -62,11 +62,18 @@ doc: $(CMT) $(CMTI)
 TARGET_INSTALL_FILES=$(ARCHIVE_TARGET_INSTALL_FILES) $(FILES_TARGET_INSTALL_FILES)
 install:: default_install
 
+realclean:: clean
+	rm -f all_ast.ml
+
 local-install::
 	$(MAKE) DESTDIR=$(WD)/$(TOP)/local-install/ install
+
+all_ast.ml: all_ast.ORIG.ml
+	cppo $< > all_ast.ml.NEW && mv all_ast.ml.NEW all_ast.ml
 
 $(TARGET): $(CMO)
 	$(OCAMLFIND) ocamlc $(DEBUG) $^ -a -o $(TARGET)
 
-$(TARGET:.cma=.cmxa): $(CMX)
+$(TARGET:.cma=.cmxa) $(TARGET:.cma=.a): $(CMX)
 	$(OCAMLFIND) ocamlopt $(DEBUG) $^ -a -o $(TARGET:.cma=.cmxa)
+
