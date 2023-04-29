@@ -60,27 +60,20 @@ module  Migrate
     let signature_item e = M.migrate_signature_item (M.make_dt()) None e
     let type_extension e = M.migrate_type_extension (M.make_dt()) None e
   end
-(*
-module  Compose
-          (A : ASTSIG)
-          (B : ASTSIG)
-          (C : ASTSIG)
-          (M : sig
-             type 'aux dispatch_table_t
-              type ('aux, 'a, 'b) migrater_t =
-                'aux dispatch_table_t -> SRC.location_t option -> 'a -> 'b
-              val make_dt : 'a -> 'a dispatch_table_t
-              val migrate_expression :
-                'aux .
-                ('aux, SRC.expression, DST.expression)
-                  migrater_t
-            end) : (MIGRATION with module SRC = SRC and module DST = DST) =
+
+module Compose
+         (M1 : MIGRATION)
+         (M2:MIGRATION with module SRC = M1.DST)
+       : (MIGRATION with module SRC = M1.SRC and module DST = M2.DST) =
   struct
-    module SRC = SRC
-    module DST = DST
-    let expression e = M.migrate_expression (M.make_dt()) None e
+    module SRC = M1.SRC
+    module DST = M2.DST
+    let expression e = e |> M1.expression |> M2.expression
+    let core_type e = e |> M1.core_type |> M2.core_type
+    let structure_item e = e |> M1.structure_item |> M2.structure_item
+    let signature_item e = e |> M1.signature_item |> M2.signature_item
+    let type_extension e = e |> M1.type_extension |> M2.type_extension
   end
- *)
 
 module Migrate_402_403 = Migrate(Migrate_402_403)
 module Migrate_402_404 = Migrate(Migrate_402_404)
@@ -116,3 +109,5 @@ module Migrate_413_414 = Migrate(Migrate_413_414)
 module Migrate_414_413 = Migrate(Migrate_414_413)
 module Migrate_414_500 = Migrate(Migrate_414_500)
 module Migrate_500_414 = Migrate(Migrate_500_414)
+
+module FULL = Compose(Migrate_402_403)(Compose(Migrate_403_404)(Compose(Migrate_404_405)(Migrate_405_406)))
