@@ -685,6 +685,30 @@ value str_item_gen_migrate name arg = fun [
 | _ -> assert False ]
 ;
 
+value sig_item_gen_migrate name arg = fun [
+  <:sig_item:< type $_flag:_$ $list:tdl$ >> ->
+    let rc = Migrate.build_context loc arg tdl in
+    let dispatch_type_decls = Migrate.dispatch_table_type_decls loc rc in
+    let migrate_dispatcher_decls = List.map (fun (dname,d) ->
+        let ety = Migrate.dispatcher_type loc rc (dname, d) in
+        let ety = match ety with [
+            <:ctyp< ! $list:l$ . $rhs$ >> ->
+            let l = ["aux" :: l] in
+            <:ctyp< ! $list:l$ . $rhs$ >>
+          | rhs -> 
+            let l = ["aux"] in
+            <:ctyp< ! $list:l$ . $rhs$ >>
+            ] in
+        <:sig_item< value $dname$ : $ety$ >>
+      ) rc.Migrate.dispatchers in
+    <:sig_item<
+      declare type $list:dispatch_type_decls$ ;
+      declare $list:migrate_dispatcher_decls$ end  ;
+      value $lid:rc.dispatch_table_constructor$ : 'a -> dispatch_table_t 'a ;
+  end >>
+| _ -> assert False ]
+;
+
 Pa_deriving.(Registry.add PI.{
   name = "migrate"
 ; alternates = []
@@ -707,7 +731,7 @@ Pa_deriving.(Registry.add PI.{
 ; expr = (fun arg e -> assert False)
 ; ctyp = (fun arg e -> assert False)
 ; str_item = str_item_gen_migrate
-; sig_item = (fun arg e -> assert False)
+; sig_item = sig_item_gen_migrate
 })
 ;
 

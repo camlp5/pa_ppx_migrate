@@ -17,6 +17,9 @@ ML=\
 	ex_ast.ml ex_migrate.ml test_ex.ml \
 	ex_camlp5.ml ex_map_camlp5.ml test_ex_camlp5.ml \
 
+MLI=\
+	ex_migrate.mli \
+
 ALLSRC=$(ML)
 ALLPACKAGES=$(PACKAGES)
 

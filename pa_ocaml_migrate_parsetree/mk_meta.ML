@@ -13,22 +13,22 @@ Arg.(parse [
 ;;
 
 Fmt.(pf stdout {|# Specifications for the "pa_ocaml_migrate_parsetree" library:
-requires = "camlp5,fmt,bos"
+requires = "fmt,bos"
 version = "%s"
 description = "pa_ocaml_migrate_parsetree support"
 
 # For linking
 package "link" (
-requires = "camlp5,fmt,bos"
-archive(byte) = "pa_omp.cma"
-archive(native) = "pa_omp.cmxa"
+requires = "fmt,bos"
+archive(byte) = "pa_ppx_migrate_ocaml_migrate_parsetree.cma"
+archive(native) = "pa_ppx_migrate_ocaml_migrate_parsetree.cmxa"
 )
 
 # For the toploop:
-archive(byte,toploop) = "pa_omp.cma"
+archive(byte,toploop) = "pa_ppx_migrate_ocaml_migrate_parsetree.cma"
 
   # For the preprocessor itself:
-  requires(syntax,preprocessor) = "camlp5,fmt,bos"
-  archive(syntax,preprocessor,-native) = "pa_omp.cma"
-  archive(syntax,preprocessor,native) = "pa_omp.cmxa"
+  requires(syntax,preprocessor) = "fmt,bos"
+  archive(syntax,preprocessor,-native) = "pa_ppx_migrate_ocaml_migrate_parsetree.cma"
+  archive(syntax,preprocessor,native) = "pa_ppx_migrate_ocaml_migrate_parsetree.cmxa"
 |} version)
