@@ -228,6 +228,13 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           srctype = [%typ: type_immediacy_t]
         ; dsttype = [%typ: DST.Type_immediacy.t]
         }
+      ; migrate_variance_injectivity = {
+          srctype = [%typ: variance_injectivity]
+        ; dsttype = [%typ: DST.Asttypes.variance * DST.Asttypes.injectivity]
+        ; code = fun __dt__ __inh__ (v, i) ->
+                 (__dt__.migrate_variance __dt__ __inh__ v,
+                  __dt__.migrate_injectivity __dt__ __inh__ i)
+        }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
         ; dsttype = [%typ: DST.Outcometree.out_type]

@@ -208,17 +208,11 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_variance = {
           srctype = [%typ: variance]
-        ; dsttype = [%typ: DST.Asttypes.variance]
-        ; custom_branches_code = function
-            Invariant -> NoVariance
-        }
-      ; migrate_core_type_variance = {
-          srctype = [%typ: core_type_variance]
-        ; dsttype = [%typ: DST.Parsetree.core_type * (DST.Asttypes.variance * DST.Asttypes.injectivity)]
-        ; code = fun __dt__ __inh__ (ty, v) ->
-            (__dt__.migrate_core_type __dt__ __inh__ ty,
-             (__dt__.migrate_variance __dt__ __inh__ v,
-              DST.Asttypes.NoInjectivity))
+        ; dsttype = [%typ: (DST.Asttypes.variance * DST.Asttypes.injectivity)]
+        ; code = fun __dt__ __inh__ -> function
+            Covariant -> (Covariant, DST.Asttypes.NoInjectivity)
+          | Contravariant -> (Contravariant, DST.Asttypes.NoInjectivity)
+          | Invariant -> (NoVariance, DST.Asttypes.NoInjectivity)
         }
       ; migrate_out_type_param = {
           srctype = [%typ: out_type_param]

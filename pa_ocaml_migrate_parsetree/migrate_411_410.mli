@@ -173,6 +173,12 @@ include (sig open Reorg_ast end)
           srctype = [%typ: type_immediacy_t]
         ; dsttype = [%typ: DST.Type_immediacy.t]
         }
+      ; migrate_out_type_param = {
+          srctype = [%typ: out_type_param]
+        ; dsttype = [%typ: string * (bool * bool)]
+        ; code = fun __dt__ __inh__ p ->
+            p
+        }
       ; migrate_printer = {
           srctype = [%typ: (Format.formatter -> unit)]
         ; dsttype = [%typ: (Format.formatter -> unit)]

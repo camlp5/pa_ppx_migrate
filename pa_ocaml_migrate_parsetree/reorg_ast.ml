@@ -2973,10 +2973,16 @@ and out_variant = [%import: All_ast.Ast_4_11.Outcometree.out_variant]
 and out_class_type = [%import: All_ast.Ast_4_11.Outcometree.out_class_type]
 and out_class_sig_item = [%import: All_ast.Ast_4_11.Outcometree.out_class_sig_item]
 and out_module_type = [%import: All_ast.Ast_4_11.Outcometree.out_module_type]
-and out_sig_item = [%import: All_ast.Ast_4_11.Outcometree.out_sig_item]
+and out_sig_item = [%import: All_ast.Ast_4_11.Outcometree.out_sig_item
+  [@with
+    [%typ: string * (bool * bool)] := out_type_param
+  ]
+]
+and out_type_param = string * (bool * bool)
 and out_type_decl = [%import: All_ast.Ast_4_11.Outcometree.out_type_decl
     [@with Asttypes.private_flag := private_flag
         ; Type_immediacy.t := type_immediacy_t
+        ; [%typ: string * (bool * bool)] := out_type_param
     ]
 ]
 and out_extension_constructor = [%import: All_ast.Ast_4_11.Outcometree.out_extension_constructor
@@ -3114,10 +3120,11 @@ and type_declaration = [%import: All_ast.Ast_4_12.Parsetree.type_declaration
     [@with Location.t := location_t
           ; Asttypes.loc := location_loc
           ; Asttypes.variance := variance
-          ; Asttypes.injectivity := injectivity
           ; Asttypes.private_flag := private_flag
+          ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
+and variance_injectivity = All_ast.Ast_4_12.Asttypes.variance * All_ast.Ast_4_12.Asttypes.injectivity
 and type_kind = [%import: All_ast.Ast_4_12.Parsetree.type_kind]
 and label_declaration = [%import: All_ast.Ast_4_12.Parsetree.label_declaration
     [@with Location.t := location_t
@@ -3135,9 +3142,9 @@ and type_extension = [%import: All_ast.Ast_4_12.Parsetree.type_extension
     [@with Longident.t := longident_t
          ; Asttypes.loc := location_loc
          ; Asttypes.variance := variance
-         ; Asttypes.injectivity := injectivity
          ; Asttypes.private_flag := private_flag
          ; Location.t := location_t
+         ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
 and extension_constructor = [%import: All_ast.Ast_4_12.Parsetree.extension_constructor
@@ -3181,8 +3188,8 @@ and 'a class_infos = [%import: 'a All_ast.Ast_4_12.Parsetree.class_infos
     [@with Location.t := location_t
          ; Asttypes.loc := location_loc
          ; Asttypes.variance := variance
-         ; Asttypes.injectivity := injectivity
          ; Asttypes.virtual_flag := virtual_flag
+         ; [%typ: Asttypes.variance * Asttypes.injectivity] := variance_injectivity
     ]
 ]
 and class_description = [%import: All_ast.Ast_4_12.Parsetree.class_description]
