@@ -2,10 +2,8 @@ ex_ast.cmo ex_migrate.cmo test_ex.cmo ex_camlp5.cmo ex_map_camlp5.cmo test_ex_ca
 ex_ast.cmo :
 ex_ast.cmx :
 ex_migrate.cmo : \
-    ex_ast.cmo \
     ex_migrate.cmi
 ex_migrate.cmx : \
-    ex_ast.cmx \
     ex_migrate.cmi
 test_ex.cmo : \
     ex_migrate.cmi \
@@ -16,10 +14,8 @@ test_ex.cmx : \
 ex_camlp5.cmo :
 ex_camlp5.cmx :
 ex_map_camlp5.cmo : \
-    ex_camlp5.cmo \
     ex_map_camlp5.cmi
 ex_map_camlp5.cmx : \
-    ex_camlp5.cmx \
     ex_map_camlp5.cmi
 test_ex_camlp5.cmo : \
     ex_map_camlp5.cmi \
