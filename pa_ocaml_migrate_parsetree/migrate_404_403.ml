@@ -1,10 +1,10 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_04
-module DST = All_ast.Ast_4_03
+module SRC = Reorg_ast.Ast_4_04
+module DST = Reorg_ast.Ast_4_03
 
 let src_loc_none =
-  let open SRC.Lexing in
-  let open SRC.Location in
+  let open SRC in
+  let open SRC in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -14,8 +14,8 @@ let src_loc_none =
   { loc_start = loc; loc_end = loc; loc_ghost = true }
 
 let dst_loc_none =
-  let open DST.Lexing in
-  let open DST.Location in
+  let open DST in
+  let open DST in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -24,7 +24,7 @@ let dst_loc_none =
   } in
   { loc_start = loc; loc_end = loc; loc_ghost = true }
 
-exception Migration_error of string * SRC.Location.t option
+exception Migration_error of string * SRC.location_t option
 
 let migration_error location feature =
   raise (Migration_error (feature, location))
@@ -39,7 +39,7 @@ let _migrate_list subrw0 __dt__ __inh__ l =
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_04
+          srcmod = Reorg_ast.Ast_4_04
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -49,8 +49,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_04.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -65,8 +65,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_04.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -152,8 +152,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_04.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           out_attribute
         ; out_class_sig_item
@@ -188,13 +188,13 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
               Ppat_open _ -> migration_error __inh__ "Ppat_open"
         }
       ; migrate_expression_desc = {
           srctype = [%typ: expression_desc]
-        ; dsttype = [%typ: DST.Parsetree.expression_desc]
+        ; dsttype = [%typ: DST.expression_desc]
         ; custom_branches_code = function
               Pexp_letexception _ -> migration_error __inh__ "Pexp_letexception"
         }
@@ -210,7 +210,7 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_out_type_decl = {
           srctype = [%typ: out_type_decl]
-        ; dsttype = [%typ: DST.Outcometree.out_type_decl]
+        ; dsttype = [%typ: DST.out_type_decl]
         ; skip_fields = [ otype_unboxed ]
         }
       }

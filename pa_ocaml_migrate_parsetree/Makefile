@@ -30,6 +30,7 @@ ML=all_ast.ml reorg_ast.ml \
 	migrate_412_413.ml migrate_413_412.ml \
 	migrate_413_414.ml migrate_414_413.ml \
 	migrate_414_500.ml migrate_500_414.ml \
+	migrations.ml
 
 MLI=\
 	migrate_402_403.mli migrate_403_402.mli \

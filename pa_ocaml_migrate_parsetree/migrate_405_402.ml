@@ -1,10 +1,10 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_05
-module DST = All_ast.Ast_4_02
+module SRC = Reorg_ast.Ast_4_05
+module DST = Reorg_ast.Ast_4_02
 
 let src_loc_none =
-  let open SRC.Lexing in
-  let open SRC.Location in
+  let open SRC in
+  let open SRC in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -14,8 +14,8 @@ let src_loc_none =
   { loc_start = loc; loc_end = loc; loc_ghost = true }
 
 let dst_loc_none =
-  let open DST.Lexing in
-  let open DST.Location in
+  let open DST in
+  let open DST in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -28,12 +28,12 @@ let wrap_loc inh v =
   let loc = match inh with
       None -> src_loc_none
     | Some loc -> loc in
-  let open SRC.Location in
+  let open SRC in
   { txt = v ; loc = loc }
 
-let unwrap_loc v = v.SRC.Location.txt
+let unwrap_loc v = v.SRC.txt
 
-exception Migration_error of string * SRC.Location.t option
+exception Migration_error of string * SRC.location_t option
 
 let migration_error location feature =
   raise (Migration_error (feature, location))
@@ -42,34 +42,34 @@ let _migrate_list subrw0 __dt__ __inh__ l =
   List.map (subrw0 __dt__ __inh__) l
 
 let migrate_arg_label_label :
-  'a -> 'b -> SRC.Asttypes.arg_label -> DST.Asttypes.label
+  'a -> 'b -> SRC.arg_label -> DST.label
   =
   fun __dt__ __inh__ -> function
-  | SRC.Asttypes.Nolabel  -> ""
-  | SRC.Asttypes.Labelled x0 -> x0
-  | SRC.Asttypes.Optional x0 -> "?" ^ x0
+  | SRC.Nolabel  -> ""
+  | SRC.Labelled x0 -> x0
+  | SRC.Optional x0 -> "?" ^ x0
 
 let migrate_Parsetree_constant_Asttypes_constant :
-  'a -> SRC.Location.t option -> SRC.Parsetree.constant -> DST.Asttypes.constant =
+  'a -> SRC.location_t option -> SRC.constant -> DST.constant =
   fun __dt__ __inh__ -> function
-  | SRC.Parsetree.Pconst_integer (x0,x1) ->
+  | SRC.Pconst_integer (x0,x1) ->
      begin match x1 with
-     | None -> DST.Asttypes.Const_int (int_of_string x0)
+     | None -> DST.Const_int (int_of_string x0)
      | Some 'l' ->
-         DST.Asttypes.Const_int32 (Int32.of_string x0)
+         DST.Const_int32 (Int32.of_string x0)
      | Some 'L' ->
-         DST.Asttypes.Const_int64 (Int64.of_string x0)
+         DST.Const_int64 (Int64.of_string x0)
      | Some 'n' ->
-         DST.Asttypes.Const_nativeint (Nativeint.of_string x0)
+         DST.Const_nativeint (Nativeint.of_string x0)
      | Some _ -> migration_error __inh__ "Pconst_integer"
      end
-  | SRC.Parsetree.Pconst_char x0 ->
-      DST.Asttypes.Const_char x0
-  | SRC.Parsetree.Pconst_string (x0,x1) ->
-      DST.Asttypes.Const_string (x0,x1)
-  | SRC.Parsetree.Pconst_float (x0,x1) ->
+  | SRC.Pconst_char x0 ->
+      DST.Const_char x0
+  | SRC.Pconst_string (x0,x1) ->
+      DST.Const_string (x0,x1)
+  | SRC.Pconst_float (x0,x1) ->
       begin match x1 with
-      | None -> DST.Asttypes.Const_float x0
+      | None -> DST.Const_float x0
       | Some _ -> migration_error __inh__ "Pconst_float"
       end
 
@@ -80,7 +80,7 @@ let migrate_Parsetree_constant_Asttypes_constant :
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_05
+          srcmod = Reorg_ast.Ast_4_05
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -90,8 +90,8 @@ let migrate_Parsetree_constant_Asttypes_constant :
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_05.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_05
+      ; dstmod = DST
       ; types = [
           closed_flag
         ; direction_flag
@@ -105,8 +105,8 @@ let migrate_Parsetree_constant_Asttypes_constant :
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_05.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_05
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -184,8 +184,8 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_05.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_05
+      ; dstmod = DST
       ; types = [
           out_class_sig_item
         ; out_class_type
@@ -209,12 +209,12 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_arg_label = {
           srctype = [%typ: arg_label]
-        ; dsttype = [%typ: DST.Asttypes.label]
+        ; dsttype = [%typ: DST.label]
         ; code = migrate_arg_label_label
         }
       ; migrate_constant = {
           srctype = [%typ: constant]
-        ; dsttype = [%typ: DST.Asttypes.constant]
+        ; dsttype = [%typ: DST.constant]
         ; code = migrate_Parsetree_constant_Asttypes_constant
         }
       ; migrate_list = {
@@ -225,17 +225,17 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_payload = {
           srctype = [%typ: payload]
-        ; dsttype = [%typ: DST.Parsetree.payload]
+        ; dsttype = [%typ: DST.payload]
         ; custom_branches_code = function
               PSig _x0 ->
               migration_error __inh__ "PSig"
         }
       ; migrate_core_type_desc = {
           srctype = [%typ: core_type_desc]
-        ; dsttype = [%typ: DST.Parsetree.core_type_desc]
+        ; dsttype = [%typ: DST.core_type_desc]
         ; custom_branches_code = function
             | Ptyp_object (v_0, v_1) ->
-              let open DST.Parsetree in
+              let open DST in
               Ptyp_object
                 ((fun __dt__ __inh__ ->
                     __dt__.migrate_list
@@ -247,38 +247,38 @@ let migrate_Parsetree_constant_Asttypes_constant :
                    __dt__ __inh__ v_0,
                  __dt__.migrate_closed_flag __dt__ __inh__ v_1)
             | Ptyp_poly (v_0, v_1) ->
-              let open DST.Parsetree in
+              let open DST in
               Ptyp_poly
                 (List.map unwrap_loc v_0,
                  __dt__.migrate_core_type __dt__ __inh__ v_1)
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
               Ppat_open _ -> migration_error __inh__ "Ppat_open"
         }
       ; migrate_expression_desc = {
           srctype = [%typ: expression_desc]
-        ; dsttype = [%typ: DST.Parsetree.expression_desc]
+        ; dsttype = [%typ: DST.expression_desc]
         ; custom_branches_code = function
             | Pexp_letexception _ -> migration_error __inh__ "Pexp_letexception"
             | Pexp_unreachable  ->
               migration_error __inh__ "Pexp_unreachable"
             | Pexp_send (v_0, v_1) ->
-              let open DST.Parsetree in
+              let open DST in
               Pexp_send
                 (__dt__.migrate_expression __dt__ __inh__ v_0,
                  unwrap_loc v_1)
             | Pexp_newtype (v_0, v_1) ->
-              let open DST.Parsetree in
+              let open DST in
               Pexp_newtype
                 (unwrap_loc v_0,
                  __dt__.migrate_expression __dt__ __inh__ v_1)
         }
       ; migrate_constructor_arguments = {
           srctype = [%typ: constructor_arguments]
-        ; dsttype = [%typ: DST.Parsetree.core_type list]
+        ; dsttype = [%typ: DST.core_type list]
         ; custom_branches_code = function
               Pcstr_tuple pcd_args ->
               List.map (__dt__.migrate_core_type __dt__ __inh__) pcd_args
@@ -286,10 +286,10 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_class_type_field_desc = {
           srctype = [%typ: class_type_field_desc]
-        ; dsttype = [%typ: DST.Parsetree.class_type_field_desc]
+        ; dsttype = [%typ: DST.class_type_field_desc]
         ; custom_branches_code = function
             | Pctf_val v_0 ->
-              let open DST.Parsetree in
+              let open DST in
               Pctf_val
                 ((fun (v_0, v_1, v_2, v_3) ->
                     unwrap_loc v_0,
@@ -297,7 +297,7 @@ let migrate_Parsetree_constant_Asttypes_constant :
                     __dt__.migrate_virtual_flag __dt__ __inh__ v_2,
                     __dt__.migrate_core_type __dt__ __inh__ v_3) v_0)
             | Pctf_method v_0 ->
-              let open DST.Parsetree in
+              let open DST in
               Pctf_method
                 ((fun (v_0, v_1, v_2, v_3) ->
                     unwrap_loc v_0,
@@ -307,10 +307,10 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_class_field_desc = {
           srctype = [%typ: class_field_desc]
-        ; dsttype = [%typ: DST.Parsetree.class_field_desc]
+        ; dsttype = [%typ: DST.class_field_desc]
         ; custom_branches_code = function
               Pcf_inherit (v_0, v_1, v_2) ->
-              let open DST.Parsetree in
+              let open DST in
               Pcf_inherit
                 (__dt__.migrate_override_flag __dt__ __inh__ v_0,
                  __dt__.migrate_class_expr __dt__ __inh__ v_1,
@@ -318,7 +318,7 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_signature_item_desc = {
           srctype = [%typ: signature_item_desc]
-        ; dsttype = [%typ: DST.Parsetree.signature_item_desc]
+        ; dsttype = [%typ: DST.signature_item_desc]
         ; custom_branches_code = function
               Psig_type (Recursive, v_0) ->
               Psig_type (List.map (__dt__.migrate_type_declaration __dt__ __inh__) v_0)
@@ -329,7 +329,7 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_structure_item_desc = {
           srctype = [%typ: structure_item_desc]
-        ; dsttype = [%typ: DST.Parsetree.structure_item_desc]
+        ; dsttype = [%typ: DST.structure_item_desc]
         ; custom_branches_code = function
               Pstr_type (Recursive, v_0) ->
               Pstr_type (List.map (__dt__.migrate_type_declaration __dt__ __inh__) v_0)
@@ -350,13 +350,13 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
-        ; dsttype = [%typ: DST.Outcometree.out_type]
+        ; dsttype = [%typ: DST.out_type]
         ; custom_branches_code = function
               Otyp_attribute _ -> migration_error __inh__ "Otyp_attribute"
         }
       ; migrate_out_variant = {
           srctype = [%typ: out_variant]
-        ; dsttype = [%typ: DST.Outcometree.out_variant]
+        ; dsttype = [%typ: DST.out_variant]
         ; custom_branches_code = function
             | Ovar_typ (Otyp_constr (id,tyl)) ->
               Ovar_name (__dt__.migrate_out_ident __dt__ __inh__ id,
@@ -367,10 +367,10 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_out_sig_item = {
           srctype = [%typ: out_sig_item]
-        ; dsttype = [%typ: DST.Outcometree.out_sig_item]
+        ; dsttype = [%typ: DST.out_sig_item]
         ; custom_branches_code = function
               Osig_value ovd ->
-              let open DST.Outcometree in
+              let open DST in
               Osig_value
                 (ovd.oval_name,
                  __dt__.migrate_out_type __dt__ __inh__ ovd.oval_type,
@@ -379,7 +379,7 @@ let migrate_Parsetree_constant_Asttypes_constant :
         }
       ; migrate_out_type_decl = {
           srctype = [%typ: out_type_decl]
-        ; dsttype = [%typ: DST.Outcometree.out_type_decl]
+        ; dsttype = [%typ: DST.out_type_decl]
         ; skip_fields = [ otype_unboxed; otype_immediate ]
         }
       }

@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_11
-module DST = All_ast.Ast_4_12
+module SRC = Reorg_ast.Ast_4_11
+module DST = Reorg_ast.Ast_4_12
 
 include (sig open Reorg_ast end)
 
@@ -12,7 +12,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_11
+          srcmod = Reorg_ast.Ast_4_11
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -22,8 +22,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_11.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_11
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_11.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_11
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -125,8 +125,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_11.Outcometree
-            ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_11
+            ; dstmod = DST
                   ; types = [
           out_attribute
         ; out_class_sig_item
@@ -164,23 +164,23 @@ include (sig open Reorg_ast end)
         }
       ; migrate_type_immediacy_t = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_variance = {
           srctype = [%typ: variance]
-        ; dsttype = [%typ: (DST.Asttypes.variance * DST.Asttypes.injectivity)]
+        ; dsttype = [%typ: (DST.variance * DST.injectivity)]
         ; code = fun __dt__ __inh__ -> function
-            Covariant -> (Covariant, DST.Asttypes.NoInjectivity)
-          | Contravariant -> (Contravariant, DST.Asttypes.NoInjectivity)
-          | Invariant -> (NoVariance, DST.Asttypes.NoInjectivity)
+            Covariant -> (Covariant, DST.NoInjectivity)
+          | Contravariant -> (Contravariant, DST.NoInjectivity)
+          | Invariant -> (NoVariance, DST.NoInjectivity)
         }
       ; migrate_out_type_param = {
           srctype = [%typ: out_type_param]
-        ; dsttype = [%typ: DST.Outcometree.out_type_param]
+        ; dsttype = [%typ: DST.out_type_param]
         ; code = fun __dt__ __inh__ (s, (co, cn)) ->
             (s,
-             ((if not cn then DST.Asttypes.Covariant else if not co then DST.Asttypes.Contravariant else DST.Asttypes.NoVariance),
-              DST.Asttypes.NoInjectivity))
+             ((if not cn then DST.Covariant else if not co then DST.Contravariant else DST.NoVariance),
+              DST.NoInjectivity))
         }
       ; migrate_printer = {
           srctype = [%typ: (Format.formatter -> unit)]

@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_03
-module DST = All_ast.Ast_4_04
+module SRC = Reorg_ast.Ast_4_03
+module DST = Reorg_ast.Ast_4_04
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_03
+          srcmod = Reorg_ast.Ast_4_03
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_03.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_03
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_03.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_03
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -126,8 +126,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_03.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_03
+      ; dstmod = DST
       ; types = [
           out_attribute
         ; out_class_sig_item
@@ -172,7 +172,7 @@ include (sig open Reorg_ast end)
         }
       ; migrate_out_type_decl = {
           srctype = [%typ: out_type_decl]
-        ; dsttype = [%typ: DST.Outcometree.out_type_decl]
+        ; dsttype = [%typ: DST.out_type_decl]
         ; custom_fields_code = {
             otype_unboxed = false
           }

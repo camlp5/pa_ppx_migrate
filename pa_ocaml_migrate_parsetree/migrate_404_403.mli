@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_04
-module DST = All_ast.Ast_4_03
+module SRC = Reorg_ast.Ast_4_04
+module DST = Reorg_ast.Ast_4_03
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_04
+          srcmod = Reorg_ast.Ast_4_04
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_04.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_04.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -124,8 +124,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_04.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_04
+      ; dstmod = DST
       ; types = [
           out_attribute
         ; out_class_sig_item
@@ -160,13 +160,13 @@ include (sig open Reorg_ast end)
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
               Ppat_open _ -> migration_error __inh__ "Ppat_open"
         }
       ; migrate_expression_desc = {
           srctype = [%typ: expression_desc]
-        ; dsttype = [%typ: DST.Parsetree.expression_desc]
+        ; dsttype = [%typ: DST.expression_desc]
         ; custom_branches_code = function
               Pexp_letexception _ -> migration_error __inh__ "Pexp_letexception"
         }
@@ -182,7 +182,7 @@ include (sig open Reorg_ast end)
         }
       ; migrate_out_type_decl = {
           srctype = [%typ: out_type_decl]
-        ; dsttype = [%typ: DST.Outcometree.out_type_decl]
+        ; dsttype = [%typ: DST.out_type_decl]
         ; skip_fields = [ otype_unboxed ]
         }
       }

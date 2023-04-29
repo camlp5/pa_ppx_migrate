@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_07
-module DST = All_ast.Ast_4_06
+module SRC = Reorg_ast.Ast_4_07
+module DST = Reorg_ast.Ast_4_06
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_07
+          srcmod = Reorg_ast.Ast_4_07
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_07.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_07
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_07.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_07
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -126,8 +126,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_07.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_07
+      ; dstmod = DST
       ; types = [
           out_attribute
         ; out_class_sig_item

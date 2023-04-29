@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_14
-module DST = All_ast.Ast_4_13
+module SRC = Reorg_ast.Ast_4_14
+module DST = Reorg_ast.Ast_4_13
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_14
+          srcmod = Reorg_ast.Ast_4_14
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_14.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_14
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -38,8 +38,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_14.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_14
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -123,8 +123,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-          srcmod = All_ast.Ast_4_14.Outcometree
-        ; dstmod = DST.Outcometree
+          srcmod = Reorg_ast.Ast_4_14
+        ; dstmod = DST
         ; types = [
           out_attribute
         ; out_class_sig_item
@@ -171,17 +171,17 @@ include (sig open Reorg_ast end)
         }
       ; migrate_type_immediacy = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_constructor_declaration = {
           srctype = [%typ: constructor_declaration]
-        ; dsttype = [%typ: DST.Parsetree.constructor_declaration]
+        ; dsttype = [%typ: DST.constructor_declaration]
         ; inherit_code = Some pcd_loc
         ; skip_fields = [ pcd_vars ]
         }
       ; migrate_out_type_extension = {
           srctype = [%typ: out_type_extension]
-        ; dsttype = [%typ: DST.Outcometree.out_type_extension]
+        ; dsttype = [%typ: DST.out_type_extension]
         ; skip_fields = [ otyext_constructors ]
         ; custom_fields_code = {
             otyext_constructors = __dt__.migrate_list
@@ -194,10 +194,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_extension_constructor_kind = {
           srctype = [%typ: extension_constructor_kind]
-        ; dsttype = [%typ: DST.Parsetree.extension_constructor_kind]
+        ; dsttype = [%typ: DST.extension_constructor_kind]
         ; custom_branches_code = function
         | Pext_decl (v_0, v_1, v_2) ->
-           let open DST.Parsetree in
+           let open DST in
            assert ([] = v_0) ;
            Pext_decl
              (__dt__.migrate_constructor_arguments __dt__ __inh__ v_1,
@@ -205,10 +205,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
-        ; dsttype = [%typ: DST.Outcometree.out_type]
+        ; dsttype = [%typ: DST.out_type]
         ; custom_branches_code = function
         | Otyp_sum v_0 ->
-        let open DST.Outcometree in
+        let open DST in
         Otyp_sum
           (__dt__.migrate_list
              (fun __dt__ __inh__ {ocstr_name = v_0; ocstr_args = v_1; ocstr_return_type = v_2} ->

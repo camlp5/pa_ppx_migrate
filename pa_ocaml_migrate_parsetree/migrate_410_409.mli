@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_10
-module DST = All_ast.Ast_4_09
+module SRC = Reorg_ast.Ast_4_10
+module DST = Reorg_ast.Ast_4_09
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_10
+          srcmod = Reorg_ast.Ast_4_10
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_10.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_10
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_10.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_10
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -101,8 +101,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_10.Outcometree
-      ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_10
+      ; dstmod = DST
       ; types = [
           out_attribute
         ; out_class_sig_item
@@ -138,23 +138,23 @@ include (sig open Reorg_ast end)
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
             | Ppat_unpack v_0 ->
               let v_0 = map_loc (function Some x -> x
                                         | None -> migration_error __inh__ "Ppat_unpack") v_0 in
-              let open DST.Parsetree in
+              let open DST in
               Ppat_unpack
                 (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ v_0)
         }
       ; migrate_expression_desc = {
           srctype = [%typ: expression_desc]
-        ; dsttype = [%typ: DST.Parsetree.expression_desc]
+        ; dsttype = [%typ: DST.expression_desc]
         ; custom_branches_code = function
             | Pexp_letmodule (v_0, v_1, v_2) ->
               let v_0 = map_loc (function Some x -> x
                                         | None -> migration_error __inh__ "Pexp_letmodule") v_0 in
-              let open DST.Parsetree in
+              let open DST in
               Pexp_letmodule
                 (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ v_0,
                  __dt__.migrate_module_expr __dt__ __inh__ v_1,
@@ -162,10 +162,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_module_type_desc = {
           srctype = [%typ: module_type_desc]
-        ; dsttype = [%typ: DST.Parsetree.module_type_desc]
+        ; dsttype = [%typ: DST.module_type_desc]
         ; custom_branches_code = function
             | Pmty_functor (Unit, v_2) ->
-              let open DST.Parsetree in
+              let open DST in
               Pmty_functor
               (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ (wrap_loc __inh__ "*"),
                None,
@@ -173,7 +173,7 @@ include (sig open Reorg_ast end)
             | Pmty_functor (Named(v_0, v_1), v_2) ->
               let v_0 = map_loc (function Some x -> x
                                         | None -> migration_error __inh__ "Pmty_functor") v_0 in
-              let open DST.Parsetree in
+              let open DST in
               Pmty_functor
                 (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ v_0,
                  Some (__dt__.migrate_module_type __dt__ __inh__ v_1),
@@ -181,7 +181,7 @@ include (sig open Reorg_ast end)
         }
       ; migrate_module_declaration = {
           srctype = [%typ: module_declaration]
-        ; dsttype = [%typ: DST.Parsetree.module_declaration]
+        ; dsttype = [%typ: DST.module_declaration]
         ; inherit_code = Some pmd_loc
         ; skip_fields = [ pmd_name ]
         ; custom_fields_code = {
@@ -193,10 +193,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_module_expr_desc = {
           srctype = [%typ: module_expr_desc]
-        ; dsttype = [%typ: DST.Parsetree.module_expr_desc]
+        ; dsttype = [%typ: DST.module_expr_desc]
         ; custom_branches_code = function
             | Pmod_functor (Unit, v_2) ->
-              let open DST.Parsetree in
+              let open DST in
               Pmod_functor
               (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ (wrap_loc __inh__ "*"),
                None,
@@ -204,7 +204,7 @@ include (sig open Reorg_ast end)
             | Pmod_functor (Named(v_0, v_1), v_2) ->
               let v_0 = map_loc (function Some x -> x
                                         | None -> migration_error __inh__ "Pmod_functor") v_0 in
-              let open DST.Parsetree in
+              let open DST in
               Pmod_functor
                 (__dt__.migrate_location_loc (fun _ _ x -> x) __dt__ __inh__ v_0,
                  Some (__dt__.migrate_module_type __dt__ __inh__ v_1),
@@ -212,7 +212,7 @@ include (sig open Reorg_ast end)
         }
       ; migrate_module_binding = {
           srctype = [%typ: module_binding]
-        ; dsttype = [%typ: DST.Parsetree.module_binding]
+        ; dsttype = [%typ: DST.module_binding]
         ; skip_fields = [ pmb_name ]
         ; custom_fields_code = {
             pmb_name =
@@ -233,14 +233,14 @@ include (sig open Reorg_ast end)
         }
       ; migrate_out_module_type = {
           srctype = [%typ: out_module_type]
-        ; dsttype = [%typ: DST.Outcometree.out_module_type]
+        ; dsttype = [%typ: DST.out_module_type]
         ; custom_branches_code = function
             | Omty_functor (farg, v_2) ->
               let (v_0, v_1) = match farg with
                   None -> ("*", None)
                 | Some (None, mt) -> ("_", Some mt)
                 | Some (Some s, mt) -> (s, Some mt) in
-              let open DST.Outcometree in
+              let open DST in
               Omty_functor
                 (v_0,
                  Option.map (__dt__.migrate_out_module_type __dt__ __inh__) v_1,
@@ -248,7 +248,7 @@ include (sig open Reorg_ast end)
         }
       ; migrate_out_type_decl = {
           srctype = [%typ: out_type_decl]
-        ; dsttype = [%typ: DST.Outcometree.out_type_decl]
+        ; dsttype = [%typ: DST.out_type_decl]
         ; skip_fields = [ otype_immediate ]
         ; custom_fields_code = {
             otype_immediate = match otype_immediate with

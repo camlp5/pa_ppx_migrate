@@ -212,13 +212,17 @@ type default_dispatcher_t = {
 value must_subst_lid (srclid, dstlid) li =
   let rec srec li =
     if Reloc.eq_longid srclid li then
-      dstlid
+      Some dstlid
     else match li with [
-      <:extended_longident:< $longid:li$ . $uid:uid$ >> -> <:longident< $longid:srec li$ . $uid:uid$ >>
+      <:extended_longident:< $longid:li$ . $uid:uid$ >> ->
+        match srec li with [
+            None -> None
+          | Some li -> Some <:longident< $longid:li$ . $uid:uid$ >>
+          ]
     | <:extended_longident:< $longid:_$ ( $longid:_$ ) >> ->
         Ploc.raise loc (Failure Fmt.(str "must_subst_lid: unexpected -extended- longid seen: %a"
                                        Pp_MLast.pp_longid li))
-    | _ -> li
+    | _ -> None
     ]
   in srec li
 ;
@@ -226,8 +230,10 @@ value must_subst_lid (srclid, dstlid) li =
 value must_subst_lid_in_ctyp (srclid, dstlid) ty =
   match Ctyp.unapplist ty with [
     (<:ctyp:< $longid:li$ . $lid:lid$ >>, args) ->
-    let li = must_subst_lid (srclid, dstlid) li in
-    Ctyp.applist <:ctyp< $longid:li$ . $lid:lid$ >> args
+    match must_subst_lid (srclid, dstlid) li with [
+          None -> None
+        | Some li -> Some (Ctyp.applist <:ctyp< $longid:li$ . $lid:lid$ >> args)
+        ]
   | _ ->
     Ploc.raise (loc_of_ctyp ty)
       (Failure Fmt.(str "must_subst_lid_in_ctyp: the manifest type must be module-qualified:@ %a"
@@ -249,14 +255,17 @@ value fresh_tyv_args suffix ty =
 ;
 
 value generate_dsttype loc (srclid, dstlid) td =
+  let tname = td.tdNam |> uv |> snd |> uv in
+  let loc = loc_of_ctyp td.tdDef in
   let ty = match td.tdDef with [
     <:ctyp< $t1$ == $_$ >> -> t1
   | _ -> 
-    let tname = td.tdNam |> uv |> snd |> uv in
-    let loc = loc_of_ctyp td.tdDef in
     Ctyp.applist <:ctyp< $longid:srclid$ . $lid:tname$ >> (List.map (type_var_to_type loc) (uv td.tdPrm))
   ] in
-  must_subst_lid_in_ctyp (srclid, dstlid) ty
+  match must_subst_lid_in_ctyp (srclid, dstlid) ty with [
+      Some ty -> ty
+    | None -> Ctyp.applist <:ctyp< $longid:dstlid$ . $lid:tname$ >> (List.map (type_var_to_type loc) (uv td.tdPrm))
+    ]
 ;
 
 value generate_srctype loc dsttype tyid =

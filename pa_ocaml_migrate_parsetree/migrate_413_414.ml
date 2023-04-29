@@ -1,10 +1,10 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_13
-module DST = All_ast.Ast_4_14
+module SRC = Reorg_ast.Ast_4_13
+module DST = Reorg_ast.Ast_4_14
 
 let src_loc_none =
-  let open SRC.Lexing in
-  let open SRC.Location in
+  let open SRC in
+  let open SRC in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -14,8 +14,8 @@ let src_loc_none =
   { loc_start = loc; loc_end = loc; loc_ghost = true }
 
 let dst_loc_none =
-  let open DST.Lexing in
-  let open DST.Location in
+  let open DST in
+  let open DST in
   let loc = {
     pos_fname = "";
     pos_lnum = 1;
@@ -28,16 +28,16 @@ let wrap_loc inh v =
   let loc = match inh with
       None -> src_loc_none
     | Some loc -> loc in
-  let open SRC.Location in
+  let open SRC in
   { txt = v ; loc = loc }
 
 let map_loc f v =
-  let open SRC.Location in
+  let open SRC in
   { txt = f v.txt ; loc = v.loc }
 
-let unwrap_loc v = v.SRC.Location.txt
+let unwrap_loc v = v.SRC.txt
 
-exception Migration_error of string * SRC.Location.t option
+exception Migration_error of string * SRC.location_t option
 
 let migration_error location feature =
   raise (Migration_error (feature, location))
@@ -52,7 +52,7 @@ let _migrate_list subrw0 __dt__ __inh__ l =
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_13
+          srcmod = Reorg_ast.Ast_4_13
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -62,8 +62,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_13.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_13
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -79,8 +79,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_13.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_13
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -164,8 +164,8 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       }
       ; {
-          srcmod = All_ast.Ast_4_13.Outcometree
-        ; dstmod = DST.Outcometree
+          srcmod = Reorg_ast.Ast_4_13
+        ; dstmod = DST
         ; types = [
           out_attribute
         ; out_class_sig_item
@@ -212,22 +212,22 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_type_immediacy = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_constructor_declaration = {
           srctype = [%typ: constructor_declaration]
-        ; dsttype = [%typ: DST.Parsetree.constructor_declaration]
+        ; dsttype = [%typ: DST.constructor_declaration]
         ; inherit_code = Some pcd_loc
         ; custom_fields_code = { pcd_vars = [] }
         }
       ; migrate_out_type_extension = {
           srctype = [%typ: out_type_extension]
-        ; dsttype = [%typ: DST.Outcometree.out_type_extension]
+        ; dsttype = [%typ: DST.out_type_extension]
         ; skip_fields = [ otyext_constructors ]
         ; custom_fields_code = {
             otyext_constructors = __dt__.migrate_list
               (fun __dt__ __inh__ (v_0, v_1, v_2) ->
-                let open DST.Outcometree in
+                let open DST in
                 {ocstr_name = v_0;
                  ocstr_args = __dt__.migrate_list __dt__.migrate_out_type __dt__ __inh__ v_1;
                  ocstr_return_type = __dt__.migrate_option __dt__.migrate_out_type __dt__ __inh__ v_2})
@@ -236,10 +236,10 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_extension_constructor_kind = {
           srctype = [%typ: extension_constructor_kind]
-        ; dsttype = [%typ: DST.Parsetree.extension_constructor_kind]
+        ; dsttype = [%typ: DST.extension_constructor_kind]
         ; custom_branches_code = function
         | Pext_decl (v_1, v_2) ->
-           let open DST.Parsetree in
+           let open DST in
            Pext_decl
              ([],
               __dt__.migrate_constructor_arguments __dt__ __inh__ v_1,
@@ -247,10 +247,10 @@ let _migrate_list subrw0 __dt__ __inh__ l =
         }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
-        ; dsttype = [%typ: DST.Outcometree.out_type]
+        ; dsttype = [%typ: DST.out_type]
         ; custom_branches_code = function
         | Otyp_sum v_0 ->
-        let open DST.Outcometree in
+        let open DST in
         Otyp_sum
           (__dt__.migrate_list
              (fun __dt__ __inh__ (v_0, v_1, v_2) ->

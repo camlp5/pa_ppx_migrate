@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_12
-module DST = All_ast.Ast_4_11
+module SRC = Reorg_ast.Ast_4_12
+module DST = Reorg_ast.Ast_4_11
 
 include (sig open Reorg_ast end)
 
@@ -12,7 +12,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_12
+          srcmod = Reorg_ast.Ast_4_12
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -22,8 +22,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_12.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_12
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -37,8 +37,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_12.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_12
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -125,8 +125,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_12.Outcometree
-            ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_12
+            ; dstmod = DST
                   ; types = [
           out_attribute
         ; out_class_sig_item
@@ -164,17 +164,17 @@ include (sig open Reorg_ast end)
         }
       ; migrate_type_immediacy_t = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_variance = {
           srctype = [%typ: variance]
-        ; dsttype = [%typ: DST.Asttypes.variance]
+        ; dsttype = [%typ: DST.variance]
         ; custom_branches_code = function
             NoVariance -> Invariant
         }
       ; migrate_variance_injectivity = {
           srctype = [%typ: variance_injectivity]
-        ; dsttype = [%typ: DST.Asttypes.variance]
+        ; dsttype = [%typ: DST.variance]
         ; code = fun __dt__ __inh__ (v, _) ->
             __dt__.migrate_variance __dt__ __inh__ v
         }

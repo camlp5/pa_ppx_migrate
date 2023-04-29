@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_12
-module DST = All_ast.Ast_4_13
+module SRC = Reorg_ast.Ast_4_12
+module DST = Reorg_ast.Ast_4_13
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_12
+          srcmod = Reorg_ast.Ast_4_12
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_12.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_12
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -38,8 +38,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_12.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_12
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -125,8 +125,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-        srcmod = All_ast.Ast_4_12.Outcometree
-            ; dstmod = DST.Outcometree
+        srcmod = Reorg_ast.Ast_4_12
+            ; dstmod = DST
                   ; types = [
           out_attribute
         ; out_class_sig_item
@@ -174,10 +174,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
         | Ppat_construct (v_0, v_1) ->
-           let open DST.Parsetree in
+           let open DST in
            Ppat_construct
              (__dt__.migrate_location_loc __dt__.migrate_longident_t __dt__ __inh__ v_0,
               __dt__.migrate_option (fun __dt__ __inh__ p -> ([], __dt__.migrate_pattern __dt__ __inh__ p))
@@ -185,21 +185,21 @@ include (sig open Reorg_ast end)
         }
       ; migrate_type_immediacy_t = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_variance_injectivity = {
           srctype = [%typ: variance_injectivity]
-        ; dsttype = [%typ: DST.Asttypes.variance * DST.Asttypes.injectivity]
+        ; dsttype = [%typ: DST.variance * DST.injectivity]
         ; code = fun __dt__ __inh__ (v, i) ->
                  (__dt__.migrate_variance __dt__ __inh__ v,
                   __dt__.migrate_injectivity __dt__ __inh__ i)
         }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
-        ; dsttype = [%typ: DST.Outcometree.out_type]
+        ; dsttype = [%typ: DST.out_type]
         ; custom_branches_code = function
     | Otyp_module (v_0, v_1, v_2) ->
-        let open DST.Outcometree in
+        let open DST in
         if List.length v_1 <> List.length v_2 then
           migration_error None "Otyp_module args of differing length" ;
         Otyp_module

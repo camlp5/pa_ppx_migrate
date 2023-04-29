@@ -1,6 +1,6 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
-module SRC = All_ast.Ast_4_13
-module DST = All_ast.Ast_4_12
+module SRC = Reorg_ast.Ast_4_13
+module DST = Reorg_ast.Ast_4_12
 
 include (sig open Reorg_ast end)
 
@@ -11,7 +11,7 @@ include (sig open Reorg_ast end)
     ; dispatch_table_constructor = make_dt
     ; default_dispatchers = [
         {
-          srcmod = All_ast.Ast_4_13
+          srcmod = Reorg_ast.Ast_4_13
         ; dstmod = DST
         ; types = [
             lexing_position
@@ -21,8 +21,8 @@ include (sig open Reorg_ast end)
           ]
         }
       ; {
-        srcmod = All_ast.Ast_4_13.Asttypes
-      ; dstmod = DST.Asttypes
+        srcmod = Reorg_ast.Ast_4_13
+      ; dstmod = DST
       ; types = [
           arg_label
         ; closed_flag
@@ -38,8 +38,8 @@ include (sig open Reorg_ast end)
         ]
       }
       ; {
-        srcmod = All_ast.Ast_4_13.Parsetree
-      ; dstmod = DST.Parsetree
+        srcmod = Reorg_ast.Ast_4_13
+      ; dstmod = DST
       ; types = [
           attribute
         ; attributes
@@ -123,8 +123,8 @@ include (sig open Reorg_ast end)
         }
       }
       ; {
-          srcmod = All_ast.Ast_4_13.Outcometree
-        ; dstmod = DST.Outcometree
+          srcmod = Reorg_ast.Ast_4_13
+        ; dstmod = DST
         ; types = [
           out_attribute
         ; out_class_sig_item
@@ -172,10 +172,10 @@ include (sig open Reorg_ast end)
         }
       ; migrate_pattern_desc = {
           srctype = [%typ: pattern_desc]
-        ; dsttype = [%typ: DST.Parsetree.pattern_desc]
+        ; dsttype = [%typ: DST.pattern_desc]
         ; custom_branches_code = function
         | Ppat_construct (v_0, v_1) ->
-           let open DST.Parsetree in
+           let open DST in
            Ppat_construct
              (__dt__.migrate_location_loc __dt__.migrate_longident_t __dt__ __inh__ v_0,
               __dt__.migrate_option (fun __dt__ __inh__ (l,p) ->
@@ -186,14 +186,14 @@ include (sig open Reorg_ast end)
         }
       ; migrate_signature_item_desc = {
           srctype = [%typ: signature_item_desc]
-        ; dsttype = [%typ: DST.Parsetree.signature_item_desc]
+        ; dsttype = [%typ: DST.signature_item_desc]
         ; custom_branches_code = function
         | Psig_modtypesubst mtd ->
            migration_error (Some mtd.pmtd_loc) "cannot migrate module type subst from 4.13 -> 4.12" 
         }
       ; migrate_with_constraint = {
           srctype = [%typ: with_constraint]
-        ; dsttype = [%typ: DST.Parsetree.with_constraint]
+        ; dsttype = [%typ: DST.with_constraint]
         ; custom_branches_code = function
         | Pwith_modtype (liloc, _) ->
            migration_error (Some liloc.loc) "cannot migrate with module type constraint from 4.13 -> 4.12" 
@@ -202,14 +202,14 @@ include (sig open Reorg_ast end)
         }
       ; migrate_type_immediacy_t = {
           srctype = [%typ: type_immediacy_t]
-        ; dsttype = [%typ: DST.Type_immediacy.t]
+        ; dsttype = [%typ: DST.type_immediacy_t]
         }
       ; migrate_out_type = {
           srctype = [%typ: out_type]
-        ; dsttype = [%typ: DST.Outcometree.out_type]
+        ; dsttype = [%typ: DST.out_type]
         ; custom_branches_code = function
     | Otyp_module (v_0, v_1) ->
-        let open DST.Outcometree in
+        let open DST in
         Otyp_module
           (__dt__.migrate_out_ident __dt__ __inh__ v_0,
            List.map fst v_1,

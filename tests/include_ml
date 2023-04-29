@@ -32,28 +32,40 @@ open Asttypes ;;
 open Parsetree ;;
 open Longident ;;
 
-let pp_ctyp ty = Fmt.(pf stdout "#<ctyp< %s >>" (Eprinter.apply Pcaml.pr_ctyp Pprintf.empty_pc ty));;
-let pp_expr ty = Fmt.(pf stdout "#<expr< %s >>" (Eprinter.apply Pcaml.pr_expr Pprintf.empty_pc ty));;
-let pp_patt ty = Fmt.(pf stdout "#<patt< %s >>" (Eprinter.apply Pcaml.pr_patt Pprintf.empty_pc ty));;
+let pp_ctyp pps ty = Fmt.(pf pps "#<ctyp< %s >>" (Eprinter.apply Pcaml.pr_ctyp Pprintf.empty_pc ty));;
+let pp_expr pps ty = Fmt.(pf pps "#<expr< %s >>" (Eprinter.apply Pcaml.pr_expr Pprintf.empty_pc ty));;
+let pp_patt pps ty = Fmt.(pf pps "#<patt< %s >>" (Eprinter.apply Pcaml.pr_patt Pprintf.empty_pc ty));;
+let pp_longident pps ty = Fmt.(pf pps "#<longident< %s >>" (Eprinter.apply Pcaml.pr_longident Pprintf.empty_pc ty));;
 
-let pp_str_item ty = Fmt.(pf stdout "#<str_item< %s >>" (Eprinter.apply Pcaml.pr_str_item Pprintf.empty_pc ty));;
-let pp_sig_item ty = Fmt.(pf stdout "#<str_item< %s >>" (Eprinter.apply Pcaml.pr_sig_item Pprintf.empty_pc ty));;
+let pp_str_item pps ty = Fmt.(pf pps "#<str_item< %s >>" (Eprinter.apply Pcaml.pr_str_item Pprintf.empty_pc ty));;
+let pp_sig_item pps ty = Fmt.(pf pps "#<str_item< %s >>" (Eprinter.apply Pcaml.pr_sig_item Pprintf.empty_pc ty));;
 (*
-let pp_ctyp ty = Fmt.(pf stdout "#<ctyp< %a >>" Pa_ppx_base.Pp_MLast.pp_ctyp ty);;
-let pp_expr ty = Fmt.(pf stdout "#<expr< %a >>" Pa_ppx_base.Pp_MLast.pp_expr ty);;
-let pp_patt ty = Fmt.(pf stdout "#<patt< %a >>" Pa_ppx_base.Pp_MLast.pp_patt ty);;
-*)
+let pp_ctyp pps ty = Fmt.(pf pps "#<ctyp< %a >>" Pa_ppx_base.Pp_MLast.pp_ctyp ty);;
+let pp_expr pps ty = Fmt.(pf pps "#<expr< %a >>" Pa_ppx_base.Pp_MLast.pp_expr ty);;
+let pp_patt pps ty = Fmt.(pf pps "#<patt< %a >>" Pa_ppx_base.Pp_MLast.pp_patt ty);;
+ *)
 #install_printer pp_ctyp ;;
-(*
 #install_printer pp_expr ;;
-*)
 #install_printer pp_patt ;;
 #install_printer pp_str_item ;;
 #install_printer pp_sig_item ;;
+#install_printer pp_longident ;;
 
 print_string "================ START ================\n";; flush stdout ;;
 
+#require "pa_ppx_migrate";;
 
+#trace Pa_deriving_migrate.Migrate.generate_dsttype ;;
+#trace Pa_deriving_migrate.Migrate.must_subst_lid_in_ctyp ;;
+#trace Pa_deriving_migrate.Migrate.must_subst_lid ;;
+
+"../pa_ocaml_migrate_parsetree/foo.ml"
+ |> Fpath.v
+ |>  Bos.OS.File.read
+ |> Rresult.R.get_ok
+ |> PAPR.Implem.pa1
+ |> PAPR.Implem.pr
+ |> print_string ;;
 (*
 ;;; Local Variables: ***
 ;;; mode:tuareg ***
