@@ -12,7 +12,7 @@ export IMPORT_OCAMLCFLAGS += -ppopt -pa_import-I -ppopt . -ppopt -pa_passthru-de
 TARGET_PACKAGE=pa_ppx_migrate_ocaml_migrate_parsetree
 TARGET=$(TARGET_PACKAGE).cma
 
-ML=all_ast.ml \
+ML=all_ast.ml reorg_ast.ml \
 	migrate_402_403.ml migrate_403_402.ml \
 	migrate_402_404.ml migrate_404_402.ml \
 	migrate_402_405.ml migrate_405_402.ml \

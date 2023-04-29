@@ -2,6 +2,9 @@
 module SRC = All_ast.Ast_4_12
 module DST = All_ast.Ast_4_11
 
+(*
+[%%import: Reorg_ast.Ast_4_12.attribute]
+ *)
 type lexing_position = [%import: All_ast.Ast_4_12.Lexing.position]
 and location_t = [%import: All_ast.Ast_4_12.Location.t
     [@with Lexing.position := lexing_position]
