@@ -20,7 +20,7 @@ ML=\
 MLI=\
 	ex_migrate.mli \
 
-ALLSRC=$(ML)
+ALLSRC=$(ML) $(MLI)
 ALLPACKAGES=$(PACKAGES)
 
 TESTS= \
