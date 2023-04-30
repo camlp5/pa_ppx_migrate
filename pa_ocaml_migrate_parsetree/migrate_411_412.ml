@@ -210,9 +210,9 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           srctype = [%typ: variance]
         ; dsttype = [%typ: (DST.variance * DST.injectivity)]
         ; code = fun __dt__ __inh__ -> function
-            Covariant -> (Covariant, DST.NoInjectivity)
-          | Contravariant -> (Contravariant, DST.NoInjectivity)
-          | Invariant -> (NoVariance, DST.NoInjectivity)
+            Covariant -> DST.(Covariant, NoInjectivity)
+          | Contravariant -> DST.(Contravariant, NoInjectivity)
+          | Invariant -> DST.(NoVariance, NoInjectivity)
         }
       ; migrate_out_type_param = {
           srctype = [%typ: out_type_param]
