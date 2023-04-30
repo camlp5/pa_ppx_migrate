@@ -17,23 +17,18 @@ module type RAW_MIGRATION = sig
     'aux dispatch_table_t -> SRC.location_t option -> 'a -> 'b
   val make_dt : 'a -> 'a dispatch_table_t
   val migrate_expression :
-    'aux .
     ('aux, SRC.expression, DST.expression)
       migrater_t
   val migrate_core_type :
-    'aux .
     ('aux, SRC.core_type, DST.core_type)
       migrater_t
   val migrate_structure_item :
-    'aux .
     ('aux, SRC.structure_item, DST.structure_item)
       migrater_t
   val migrate_signature_item :
-    'aux .
     ('aux, SRC.signature_item, DST.signature_item)
       migrater_t
   val migrate_type_extension :
-    'aux .
     ('aux, SRC.type_extension, DST.type_extension)
       migrater_t
 end

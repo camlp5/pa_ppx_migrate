@@ -711,12 +711,8 @@ value sig_item_gen_migrate name arg = fun [
     let migrate_dispatcher_decls = List.map (fun (dname,d) ->
         let ety = Migrate.dispatcher_type loc rc (dname, d) in
         let ety = match ety with [
-            <:ctyp< ! $list:l$ . $rhs$ >> ->
-            let l = ["aux" :: l] in
-            <:ctyp< ! $list:l$ . $rhs$ >>
-          | rhs -> 
-            let l = ["aux"] in
-            <:ctyp< ! $list:l$ . $rhs$ >>
+            <:ctyp< ! $list:l$ . $rhs$ >> -> rhs
+          | rhs -> rhs
             ] in
         <:sig_item< value $dname$ : $ety$ >>
       ) rc.Migrate.dispatchers in
