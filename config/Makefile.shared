@@ -1,6 +1,9 @@
 # Makefile,v
 # Copyright (c) INRIA 2007-2017
 
+ocamlVERSION=$(shell ocamlc --version)
+camlp5VERSION=$(shell camlp5 -version)
+
 RM=rm
 
 DEBUG=-g
@@ -37,6 +40,7 @@ default_install:: META $(TARGET_INSTALL_FILES) $(DEFAULT_INSTALL_FILES)
 default_uninstall::
 	$(NOT_OCAMLFIND) remove $(TARGET_PACKAGE) -destdir $(DESTDIR)/lib
 
+ifdef DEBUG_PREPROCESS
 .mli.cmi:
 	$(LAUNCH) $(YAWRAP) $(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) -package $(PACKAGES),$(PRPACKAGE) $< > $*_ppo.mli
 	perl -p -i -e 's,-syntax camlp5r,-syntax camlp5o,' $*_ppo.mli
@@ -50,6 +54,21 @@ default_uninstall::
 	perl -p -i -e 's, -package pa_ppx.deriving_plugins.params , ,' $*_ppo.ml
 	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(WARNERR) $(OCAMLCFLAGS) -package $(PACKAGES) -c $*_ppo.ml
 	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -c $<
+else
+.mli.cmi:
+#	$(LAUNCH) $(YAWRAP) $(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) -package $(PACKAGES),$(PRPACKAGE) $< > $*_ppo.mli
+#	perl -p -i -e 's,-syntax camlp5r,-syntax camlp5o,' $*_ppo.mli
+#	perl -p -i -e 's, -package pa_ppx.deriving_plugins.params , ,' $*_ppo.mli
+#	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(WARNERR) $(OCAMLCFLAGS) -package $(PACKAGES) -c $*_ppo.mli
+	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -c $<
+
+.ml.cmo:
+#	$(LAUNCH) $(YAWRAP) $(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) -package $(PACKAGES),$(PRPACKAGE) $< > $*_ppo.ml
+#	perl -p -i -e 's,-syntax camlp5r,-syntax camlp5o,' $*_ppo.ml
+#	perl -p -i -e 's, -package pa_ppx.deriving_plugins.params , ,' $*_ppo.ml
+#	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(WARNERR) $(OCAMLCFLAGS) -package $(PACKAGES) -c $*_ppo.ml
+	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlc $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -c $<
+endif
 
 .ml.cmx:
 	$(LAUNCH) $(YAWRAP) $(OCAMLFIND) ocamlopt $(DEBUG) $(OCAMLCFLAGS) -package $(PACKAGES) -c $<

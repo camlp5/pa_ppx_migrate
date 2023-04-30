@@ -1,153 +1,157 @@
 # 1 "ast.ORIG.ml"
+(**pp -syntax camlp5o *)
 (* camlp5r *)
 (* pp_parsetree.ml,v *)
 
 module Lexing = struct
 [%%import: 
-# 5 "ast.ORIG.ml"
+# 6 "ast.ORIG.ml"
              
-# 5 "ast.ORIG.ml"
+# 6 "ast.ORIG.ml"
                   Lexing.position] 
 end
 
 
-# 14 "ast.ORIG.ml"
+# 15 "ast.ORIG.ml"
 module Location = struct
-[%%import: 
-# 15 "ast.ORIG.ml"
-             
-# 15 "ast.ORIG.ml"
-                  Location.t] 
+# 21 "ast.ORIG.ml"
+type t = [%import: 
+# 21 "ast.ORIG.ml"
+                     
+# 21 "ast.ORIG.ml"
+                          Location.t]
+# 23 "ast.ORIG.ml"
 [%%import: 'a 
-# 16 "ast.ORIG.ml"
+# 23 "ast.ORIG.ml"
                 
-# 16 "ast.ORIG.ml"
-                     Location.loc] 
+# 23 "ast.ORIG.ml"
+                     Location.loc]
 end
 module Longident = struct
 [%%import: 
-# 19 "ast.ORIG.ml"
+# 26 "ast.ORIG.ml"
              
-# 19 "ast.ORIG.ml"
+# 26 "ast.ORIG.ml"
                   Longident.t] 
 end
 module Asttypes = struct
+# 30 "ast.ORIG.ml"
+type 'a loc = [%import: 'a 
+# 30 "ast.ORIG.ml"
+                             
+# 30 "ast.ORIG.ml"
+                                  Asttypes.loc [@synonym: 'a Location.loc]] 
+# 35 "ast.ORIG.ml"
 [%%import: 
-# 22 "ast.ORIG.ml"
+# 35 "ast.ORIG.ml"
              
-# 22 "ast.ORIG.ml"
-                  Asttypes.loc] 
-# 24 "ast.ORIG.ml"
-[%%import: 
-# 24 "ast.ORIG.ml"
-             
-# 24 "ast.ORIG.ml"
+# 35 "ast.ORIG.ml"
                   Asttypes.arg_label] 
-# 26 "ast.ORIG.ml"
+# 37 "ast.ORIG.ml"
 [%%import: 
-# 26 "ast.ORIG.ml"
+# 37 "ast.ORIG.ml"
              
-# 26 "ast.ORIG.ml"
+# 37 "ast.ORIG.ml"
                   Asttypes.label] 
 [%%import: 
-# 27 "ast.ORIG.ml"
+# 38 "ast.ORIG.ml"
              
-# 27 "ast.ORIG.ml"
+# 38 "ast.ORIG.ml"
                   Asttypes.closed_flag] 
 [%%import: 
-# 28 "ast.ORIG.ml"
+# 39 "ast.ORIG.ml"
              
-# 28 "ast.ORIG.ml"
+# 39 "ast.ORIG.ml"
                   Asttypes.rec_flag] 
 [%%import: 
-# 29 "ast.ORIG.ml"
+# 40 "ast.ORIG.ml"
              
-# 29 "ast.ORIG.ml"
+# 40 "ast.ORIG.ml"
                   Asttypes.direction_flag] 
 [%%import: 
-# 30 "ast.ORIG.ml"
+# 41 "ast.ORIG.ml"
              
-# 30 "ast.ORIG.ml"
+# 41 "ast.ORIG.ml"
                   Asttypes.private_flag] 
 [%%import: 
-# 31 "ast.ORIG.ml"
+# 42 "ast.ORIG.ml"
              
-# 31 "ast.ORIG.ml"
+# 42 "ast.ORIG.ml"
                   Asttypes.mutable_flag] 
 [%%import: 
-# 32 "ast.ORIG.ml"
+# 43 "ast.ORIG.ml"
              
-# 32 "ast.ORIG.ml"
+# 43 "ast.ORIG.ml"
                   Asttypes.virtual_flag] 
 [%%import: 
-# 33 "ast.ORIG.ml"
+# 44 "ast.ORIG.ml"
              
-# 33 "ast.ORIG.ml"
+# 44 "ast.ORIG.ml"
                   Asttypes.override_flag] 
 [%%import: 
-# 34 "ast.ORIG.ml"
+# 45 "ast.ORIG.ml"
              
-# 34 "ast.ORIG.ml"
+# 45 "ast.ORIG.ml"
                   Asttypes.variance] 
-# 41 "ast.ORIG.ml"
+# 52 "ast.ORIG.ml"
 end
 module Parsetree = struct
 open Asttypes
-# 45 "ast.ORIG.ml"
+# 56 "ast.ORIG.ml"
 [%%import: 
-# 45 "ast.ORIG.ml"
+# 56 "ast.ORIG.ml"
              
-# 45 "ast.ORIG.ml"
+# 56 "ast.ORIG.ml"
                   Parsetree.constant] 
-# 47 "ast.ORIG.ml"
+# 58 "ast.ORIG.ml"
 type location_stack = Location.t list 
 [%%import: 
-# 48 "ast.ORIG.ml"
+# 59 "ast.ORIG.ml"
              
-# 48 "ast.ORIG.ml"
+# 59 "ast.ORIG.ml"
                   Parsetree.attribute] 
 end
 
 
-# 57 "ast.ORIG.ml"
+# 68 "ast.ORIG.ml"
 module Outcometree = struct
-# 61 "ast.ORIG.ml"
+# 72 "ast.ORIG.ml"
 [%%import: 
-# 61 "ast.ORIG.ml"
+# 72 "ast.ORIG.ml"
              
-# 61 "ast.ORIG.ml"
+# 72 "ast.ORIG.ml"
                   Outcometree.out_ident] 
-# 66 "ast.ORIG.ml"
+# 77 "ast.ORIG.ml"
 [%%import: 
-# 66 "ast.ORIG.ml"
+# 77 "ast.ORIG.ml"
              
-# 66 "ast.ORIG.ml"
+# 77 "ast.ORIG.ml"
                   Outcometree.out_attribute] 
-# 68 "ast.ORIG.ml"
+# 79 "ast.ORIG.ml"
 [%%import: 
-# 68 "ast.ORIG.ml"
+# 79 "ast.ORIG.ml"
              
-# 68 "ast.ORIG.ml"
+# 79 "ast.ORIG.ml"
                   Outcometree.out_value] 
-# 72 "ast.ORIG.ml"
+# 83 "ast.ORIG.ml"
 [%%import: 
-# 72 "ast.ORIG.ml"
+# 83 "ast.ORIG.ml"
              
-# 72 "ast.ORIG.ml"
+# 83 "ast.ORIG.ml"
                   Outcometree.out_type] 
 [%%import: 
-# 73 "ast.ORIG.ml"
+# 84 "ast.ORIG.ml"
              
-# 73 "ast.ORIG.ml"
+# 84 "ast.ORIG.ml"
                   Outcometree.out_class_type] 
 [%%import: 
-# 74 "ast.ORIG.ml"
+# 85 "ast.ORIG.ml"
              
-# 74 "ast.ORIG.ml"
+# 85 "ast.ORIG.ml"
                   Outcometree.out_module_type] 
 [%%import: 
-# 75 "ast.ORIG.ml"
+# 86 "ast.ORIG.ml"
              
-# 75 "ast.ORIG.ml"
+# 86 "ast.ORIG.ml"
                   Outcometree.out_phrase] 
 end

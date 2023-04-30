@@ -20,4 +20,4 @@ for v in \
     ./DOIT 4 $v
     done
 
-./DOIT 5 0 ~rc1
+./DOIT 5 0

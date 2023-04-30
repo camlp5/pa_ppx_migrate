@@ -6,12 +6,13 @@ TAG=$3
 VERS="${MAJOR}.${MINOR}.0"
 FILEVERS="${MAJOR}_${MINOR}"
 
-cppo -D PREFIX -D "MAJOR_VERSION ${MAJOR}" -D "MINOR_VERSION ${MINOR}" ast.ORIG.ml > gen/ast.ORIG-${FILEVERS}.ml
+cppo -D REDECLARE -D PREFIX -D "OCAML_VERSION (${MAJOR}, ${MINOR}, 0)" ast.ORIG.ml > gen/ast.ORIG-${FILEVERS}.ml
 env TOP=.. ocamlfind camlp5-buildscripts/LAUNCH -- not-ocamlfind preprocess  -package unix,compiler-libs.common,camlp5.quotations,camlp5.extfun,rresult,fmt,pa_ppx.utils,pa_ppx.runtime,camlp5.macro,camlp5.pr_o,pa_ppx.import,pa_ppx.deriving_plugins.std \
 -syntax camlp5o -ppopt -D -ppopt BOOTSTRAP \
 -ppopt -pa_import-I -ppopt . \
 -ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/lib/ocaml \
 -ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/lib/ocaml/compiler-libs \
+-ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/utils \
 -ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/stdlib \
 -ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/parsing \
 -ppopt -pa_import-I -ppopt /home/chet/Hack/Opam-2.1.2/GENERIC/${VERS}${TAG}/.opam-switch/sources/ocaml-base-compiler.${VERS}${TAG}/typing \

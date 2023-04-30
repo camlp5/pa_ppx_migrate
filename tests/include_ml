@@ -54,18 +54,10 @@ let pp_patt pps ty = Fmt.(pf pps "#<patt< %a >>" Pa_ppx_base.Pp_MLast.pp_patt ty
 print_string "================ START ================\n";; flush stdout ;;
 
 #require "pa_ppx_migrate";;
+#require "pa_ppx_migrate_ocaml_migrate_parsetree";;
 
-#trace Pa_deriving_migrate.Migrate.generate_dsttype ;;
-#trace Pa_deriving_migrate.Migrate.must_subst_lid_in_ctyp ;;
-#trace Pa_deriving_migrate.Migrate.must_subst_lid ;;
 
-"../pa_ocaml_migrate_parsetree/foo.ml"
- |> Fpath.v
- |>  Bos.OS.File.read
- |> Rresult.R.get_ok
- |> PAPR.Implem.pa1
- |> PAPR.Implem.pr
- |> print_string ;;
+
 (*
 ;;; Local Variables: ***
 ;;; mode:tuareg ***
