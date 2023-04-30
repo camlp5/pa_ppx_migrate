@@ -27,3 +27,5 @@ test_ex_camlp5.cmo : \
 test_ex_camlp5.cmx : \
     ex_map_camlp5.cmx \
     ex_camlp5.cmx
+ex_migrate.cmi : \
+    ex_ast.cmo
