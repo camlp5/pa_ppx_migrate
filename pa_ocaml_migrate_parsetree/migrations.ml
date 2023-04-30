@@ -110,4 +110,14 @@ module Migrate_414_413 = Migrate(Migrate_414_413)
 module Migrate_414_500 = Migrate(Migrate_414_500)
 module Migrate_500_414 = Migrate(Migrate_500_414)
 
-module FULL = Compose(Migrate_402_403)(Compose(Migrate_403_404)(Compose(Migrate_404_405)(Migrate_405_406)))
+module Migrate_413_500 = Compose(Migrate_413_414)(Migrate_414_500)
+module Migrate_500_413 = Compose(Migrate_500_414)(Migrate_414_413)
+
+module Migrate_412_500 = Compose(Migrate_412_413)(Migrate_413_500)
+module Migrate_500_412 = Compose(Migrate_500_413)(Migrate_413_412)
+
+module Migrate_411_500 = Compose(Migrate_411_412)(Migrate_412_500)
+module Migrate_500_411 = Compose(Migrate_500_412)(Migrate_412_411)
+
+module Migrate_410_500 = Compose(Migrate_410_411)(Migrate_411_500)
+module Migrate_500_410 = Compose(Migrate_500_411)(Migrate_411_410)
