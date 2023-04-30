@@ -686,6 +686,16 @@ value str_item_gen_migrate name arg = fun [
     let migrate_dispatcher_decls = List.map (fun (dname,d) ->
         let e = Migrate.toplevel_generate_dispatcher rc (dname, d) in
         let ety = Migrate.dispatcher_type loc rc (dname, d) in
+        let (l, ety) = match ety with [
+            <:ctyp< ! $list:l$ . $rhs$ >> ->
+            let l = ["aux" :: l] in
+            (l, <:ctyp< ! $list:l$ . $rhs$ >>)
+          | rhs -> 
+            let l = ["aux"] in
+            (l, <:ctyp< ! $list:l$ . $rhs$ >>)
+            ] in
+        let e =
+          List.fold_right (fun tv e -> <:expr< fun (type $lid:tv$) -> $e$ >>) l e in
         (<:patt< ($lid:dname$ : $ety$ ) >>, e, <:vala< [] >>)
       ) rc.Migrate.dispatchers in
     let si0 = <:str_item< value rec $list:migrate_dispatcher_decls$ >> in
