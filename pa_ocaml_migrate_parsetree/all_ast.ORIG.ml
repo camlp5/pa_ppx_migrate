@@ -109,3 +109,11 @@ module Ast_5_0 = struct
 #include "gen/ast_5_0.ml"
 #endif
 end
+
+module Ast_5_1 = struct
+#if (OCAML_MAJOR,OCAML_MINOR) = (5,1)
+#include "ast_CURRENT.ml"
+#else
+#include "gen/ast_5_1.ml"
+#endif
+end
