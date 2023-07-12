@@ -20,6 +20,7 @@ type 'a pt3 = { it : 'a ; z : pvt ; z2 : pvt2 ; extra : int ; dropped_field: str
 type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
+type t6 = E of { x : int } | F of { y : bool }
 end
 
 module AST2 = struct
@@ -32,6 +33,7 @@ type 'a pt3 = { it : 'a ; z : pvt ; z2 : pvt2 ; extra : int ; new_field : int }
 type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
+type t6 = E of { x : int } | F of { y : bool }
 end
 
 module AST3 = struct

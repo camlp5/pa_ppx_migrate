@@ -541,7 +541,22 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
   else match ty with [
   <:ctyp:< [ $list:branches$ ] >> ->
   let ll = List.map (fun [
-      <:constructor< $uid:uid$ of $list:tyl$ >> ->
+      <:constructor:< $uid:uid$ of { $list:ltl$ } >> ->
+      let custom_branches = Std.filter (fun (n, _) -> uid = n) d.Dispatch1.custom_branches in
+      if custom_branches <> [] then
+        List.map snd custom_branches
+      else
+      let e =
+        let d = { (d) with Dispatch1.dstmodule = None } in
+        generate_leaf_dispatcher_expression t d subs_rho <:ctyp< { $list:ltl$ } >> in
+      match e with [
+          <:expr:< fun [ $patt$ -> $expr$ ] >> ->
+              let expr = <:expr< $uid:uid$ $expr$ >> in
+              let expr = Dispatch1.expr_wrap_dsttype_module d expr in
+              [(<:patt< $uid:uid$ $patt$ >>, <:vala< None >>, expr)]
+        ]
+
+    | <:constructor< $uid:uid$ of $list:tyl$ >> ->
       let custom_branches = Std.filter (fun (n, _) -> uid = n) d.Dispatch1.custom_branches in
       if custom_branches <> [] then
         List.map snd custom_branches
@@ -553,6 +568,7 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
           <:expr< $e$ ($app_dt t (fst sub_rw)$ $lid:v$) >>
         ) <:expr< $uid:uid$ >> argvars in
       [(patt, <:vala< None >>, Dispatch1.expr_wrap_dsttype_module d expr)]
+
     ]) branches in
   let l = List.concat ll in
   <:expr< fun [ $list:l$ ] >>
