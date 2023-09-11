@@ -3,7 +3,6 @@
 #require "oUnit";;
 #require "fmt";;
 #require "rresult";;
-#require "pcre";;
 #require "bos";;
 
 #require "camlp5.pa_op";;
