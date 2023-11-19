@@ -1,4 +1,4 @@
-(**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
+(**pp -syntax camlp5o *)
 
 module Ploc = Ex_ast.Ploc
 module Migrate_AST1_AST2 :

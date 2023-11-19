@@ -1,4 +1,4 @@
-(**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
+(**pp -syntax camlp5o *)
 exception Migration_error of string
 
 let migration_error feature =

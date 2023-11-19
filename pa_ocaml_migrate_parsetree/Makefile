@@ -8,7 +8,7 @@ include $(TOP)/config/Makefile.sub
 DESTDIR=
 
 PACKAGES := $(PACKAGES),pa_ppx.base,fmt,bos
-export IMPORT_OCAMLCFLAGS = -ppopt -pa_import-I -ppopt . -ppopt -pa_passthru-debug -package pa_ppx.import,pa_ppx_migrate
+export IMPORT_OCAMLCFLAGS = -ppopt -pa_passthru-debug -package pa_ppx.import,pa_ppx_migrate
 TARGET_PACKAGE=pa_ppx_migrate_ocaml_migrate_parsetree
 TARGET=$(TARGET_PACKAGE).cma
 
@@ -75,7 +75,7 @@ all_ast.ml: all_ast.ORIG.ml ast_CURRENT.ml $(wildcard gen/ast_*.ml)
 	cppo -V OCAML:$(ocamlVERSION) $< > all_ast.ml.NEW && mv all_ast.ml.NEW all_ast.ml
 
 ast_CURRENT.ml: ast.ml
-	$(LAUNCH) $(YAWRAP) $(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) $(IMPORT_OCAMLCFLAGS) -ppopt -pa_import-package -ppopt $(PACKAGES) -package $(PACKAGES),$(PRPACKAGE) $< > $@.NEW && mv $@.NEW $@
+	$(LAUNCH) $(YAWRAP) $(NOT_OCAMLFIND) preprocess $(OCAMLCFLAGS) $(IMPORT_OCAMLCFLAGS) -package $(PACKAGES),$(PRPACKAGE) $< > $@.NEW && mv $@.NEW $@
 
 ast.ml: ast.ORIG.ml
 	cppo -D PREFIX -V OCAML:$(ocamlVERSION) $< > $@.NEW && mv $@.NEW $@
