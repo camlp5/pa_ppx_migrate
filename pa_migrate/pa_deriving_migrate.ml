@@ -680,7 +680,9 @@ value toplevel_generate_dispatcher t (dname,d) = do {
     Fmt.(pf stderr "[toplevel_generate_dispatcher: %s]\n%!" dname)
   else () ;
   match d.Dispatch1.code with [
-    Some e -> e
+    Some <:expr:< $lid:f$ >> ->
+    <:expr< (fun __dt__ __inh__ -> $lid:f$ __dt__ __inh__) >>
+  | Some e -> e
   | None ->
     let srctype = d.Dispatch1.srctype in
     let loc = loc_of_ctyp srctype in

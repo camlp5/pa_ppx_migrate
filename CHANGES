@@ -1,4 +1,12 @@
 
+pa_ppx_migrate Version 0.12
+---------------------------
+
+* [26 Apr 2024] Camlp5 8.03.00, OCaml 5.2.0 support
+
+  latest ocaml has some typechecking changes; this required slightly
+  changing the codegenerator for migrations.
+
 pa_ppx_migrate Version 0.11
 -------------------
 
