@@ -8,7 +8,7 @@ The goal here is that the input to the automated tool is the minimum
 possible, with no need for human massaging of output from the tool.
 
 There are two examples: a small one (in a unit-test) and a full set of
-migrations from Ocaml's AST 4.02 all the way up to 4.11, with all the
+migrations from Ocaml's AST 4.02 all the way up to 5.1.0, with all the
 intermediate ASTs, and migrations forward as well as backward.
 
 """
@@ -25,8 +25,8 @@ depends: [
   "ocaml"       { >= "4.10.0" }
   "cppo" { >= "1.6.9" }
   "camlp5-buildscripts" { >= "0.02" }
-  "camlp5"      { >= "8.01.00" }
-  "pa_ppx"      { >= "0.12" }
+  "camlp5"      { >= "8.03.00" }
+  "pa_ppx"      { >= "0.15" }
   "not-ocamlfind" { >= "0.10" }
   "ounit" { >= "2.2.7" & with-test}
   "fmt"
