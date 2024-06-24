@@ -7,6 +7,11 @@ pa_ppx_migrate Version 0.12
   latest ocaml has some typechecking changes; this required slightly
   changing the codegenerator for migrations.
 
+  New syntax for "manual" migrations.  These are like any other
+  migration, but are not automatically applied, so you can define one
+  and then use it in the "code" and "custom_code" blocks of other
+  migrations.
+
 pa_ppx_migrate Version 0.11
 -------------------
 

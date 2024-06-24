@@ -8,7 +8,7 @@ The goal here is that the input to the automated tool is the minimum
 possible, with no need for human massaging of output from the tool.
 
 There are two examples: a small one (in a unit-test) and a full set of
-migrations from Ocaml's AST 4.02 all the way up to 5.1.0, with all the
+migrations from Ocaml's AST 4.02 all the way up to 5.2.0, with all the
 intermediate ASTs, and migrations forward as well as backward.
 
 """
