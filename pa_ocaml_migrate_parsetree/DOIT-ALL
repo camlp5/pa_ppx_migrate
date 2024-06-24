@@ -21,4 +21,5 @@ for v in \
     done
 
 ./DOIT 5 0
-./DOIT 5 1 ~beta1
+./DOIT 5 1
+./DOIT 5 2

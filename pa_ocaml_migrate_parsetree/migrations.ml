@@ -106,6 +106,8 @@ module Migrate_414_500 = Migrate(Migrate_414_500)
 module Migrate_500_414 = Migrate(Migrate_500_414)
 module Migrate_500_510 = Migrate(Migrate_500_510)
 module Migrate_510_500 = Migrate(Migrate_510_500)
+module Migrate_510_520 = Migrate(Migrate_510_520)
+module Migrate_520_510 = Migrate(Migrate_520_510)
 
 module Migrate_413_500 = Compose(Migrate_413_414)(Migrate_414_500)
 module Migrate_500_413 = Compose(Migrate_500_414)(Migrate_414_413)

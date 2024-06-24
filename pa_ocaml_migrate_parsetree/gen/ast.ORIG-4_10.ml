@@ -119,7 +119,7 @@ type location_stack = Location.t list
 # 59 "ast.ORIG.ml"
              
 # 59 "ast.ORIG.ml"
-                  Parsetree.attribute] 
+                  Parsetree.attribute [@with Asttypes.loc := loc ; Asttypes.label := label ; Asttypes.arg_label := arg_label ; Asttypes.closed_flag := closed_flag ; Asttypes.rec_flag := rec_flag ; Asttypes.direction_flag := direction_flag ; Asttypes.private_flag := private_flag ; Asttypes.mutable_flag := mutable_flag ; Asttypes.virtual_flag := virtual_flag ; Asttypes.variance := variance ; Asttypes.override_flag := override_flag ; Asttypes.variance := variance ; Asttypes.injectivity := injectivity]]
 end
 
 # 63 "ast.ORIG.ml"

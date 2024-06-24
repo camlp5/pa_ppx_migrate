@@ -31,6 +31,7 @@ ML=all_ast.ml reorg_ast.ml \
 	migrate_413_414.ml migrate_414_413.ml \
 	migrate_414_500.ml migrate_500_414.ml \
 	migrate_500_510.ml migrate_510_500.ml \
+	migrate_510_520.ml migrate_520_510.ml \
 	migrations.ml
 
 MLI=\
@@ -52,6 +53,7 @@ MLI=\
 	migrate_413_414.mli migrate_414_413.mli \
 	migrate_414_500.mli migrate_500_414.mli \
 	migrate_500_510.mli migrate_510_500.mli \
+	migrate_510_520.mli migrate_520_510.mli \
 
 TOOLSML = mk_meta.ml
 ALLSRC=$(ML) $(MLI) $(TOOLSML)
