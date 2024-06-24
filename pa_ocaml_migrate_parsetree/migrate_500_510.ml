@@ -1,4 +1,5 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
+[@@@ocaml.warning "@partial-match"]
 module SRC = Reorg_ast.Ast_5_0
 module DST = Reorg_ast.Ast_5_1
 

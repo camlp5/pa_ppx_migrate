@@ -236,6 +236,15 @@ include (sig open Reorg_ast end)
                   __dt__.migrate_out_class_type __dt__ __inh__)
                   __dt__ __inh__ v_2)
         }
+      ; migrate_arg_label_to_string = {
+          srctype = [%typ: arg_label]
+        ; dsttype = [%typ: string]
+        ; manual = true
+        ; code = fun __dst__ __inh__ -> function
+            SRC.Nolabel -> ""
+          | Labelled s -> s
+          | _ -> migration_error __inh__ "migrate_arg_label_to_string: unsupported label"
+        }
       }
     }
 ]

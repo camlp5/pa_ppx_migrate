@@ -310,6 +310,8 @@ migrate_520_510.cmx : \
     all_ast.cmx \
     migrate_520_510.cmi
 migrations.cmo : \
+    migrate_520_510.cmi \
+    migrate_510_520.cmi \
     migrate_510_500.cmi \
     migrate_500_510.cmi \
     migrate_500_414.cmi \
@@ -347,6 +349,8 @@ migrations.cmo : \
     migrate_402_404.cmi \
     migrate_402_403.cmi
 migrations.cmx : \
+    migrate_520_510.cmx \
+    migrate_510_520.cmx \
     migrate_510_500.cmx \
     migrate_500_510.cmx \
     migrate_500_414.cmx \

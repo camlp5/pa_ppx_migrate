@@ -1,4 +1,5 @@
 (**pp -syntax camlp5o $(IMPORT_OCAMLCFLAGS) *)
+[@@@ocaml.warning "@partial-match"]
 module SRC = Reorg_ast.Ast_5_2
 module DST = Reorg_ast.Ast_5_1
 
@@ -228,9 +229,62 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           srctype = [%typ: expression_desc]
         ; dsttype = [%typ: DST.expression_desc]
         ; custom_branches_code = function
-          | Pexp_function ([], None, Pfunction_cases (v_0,_,[])) ->
+          | Pexp_function ([], _, Pfunction_cases ([],_,_)) ->
+             migration_error __inh__ "migrate_expression: Pexp_function: empty function (no args, no cases)"
+          | Pexp_function ([], _, Pfunction_body _) ->
+             migration_error __inh__ "migrate_expression: Pexp_function: empty function (no args)"
+          | Pexp_function ([], tyopt, Pfunction_cases (v_0,_,_)) ->
+             let v_0 =
+               v_0
+               |> List.map (fun c -> match tyopt with
+                                       None -> c
+                                     | Some (Pconstraint ty) ->
+                                        { c with pc_rhs = { pexp_desc = Pexp_constraint(c.pc_rhs, ty)
+                                                          ; pexp_loc = c.pc_rhs.pexp_loc
+                                                          ; pexp_loc_stack = []
+                                                          ; pexp_attributes = []
+                                                          } }
+                                     | Some (Pcoerce (tyopt1, ty2)) ->
+                                        { c with pc_rhs = { pexp_desc = Pexp_coerce(c.pc_rhs, tyopt1, ty2)
+                                                          ; pexp_loc = c.pc_rhs.pexp_loc
+                                                          ; pexp_loc_stack = []
+                                                          ; pexp_attributes = []
+                                                          } }
+                    ) in
              let open DST in
              Pexp_function (__dt__.migrate_list __dt__.migrate_case __dt__ __inh__ v_0)
+          | Pexp_function
+               ([{ pparam_loc = loc
+                 ; pparam_desc = Pparam_val (v_0, v_1, v_2)}],
+                tyopt,
+                Pfunction_body (v_3)
+               ) ->
+             let v_3 = match tyopt with
+                 None -> v_3
+               | Some (Pconstraint ty) ->
+                  { pexp_desc = Pexp_constraint (v_3, ty)
+                  ; pexp_loc = loc
+                  ; pexp_loc_stack = []
+                  ; pexp_attributes = [] }
+               | Some (Pcoerce (tyopt1, ty2)) ->
+                  { pexp_desc = Pexp_coerce (v_3, tyopt1, ty2)
+                  ; pexp_loc = loc
+                  ; pexp_loc_stack = []
+                  ; pexp_attributes = [] }
+             in
+             Pexp_fun (__dt__.migrate_arg_label __dt__ __inh__ v_0,
+                       __dt__.migrate_option __dt__.migrate_expression __dt__ __inh__ v_1,
+                       __dt__.migrate_pattern __dt__ __inh__ v_2,
+                       __dt__.migrate_expression __dt__ __inh__ v_3)
+          | Pexp_function (h::t, tyopt, rhs) ->
+             __dt__.migrate_expression_desc __dt__ __inh__
+             (Pexp_function([h], None,
+                            Pfunction_body
+                              { pexp_desc = Pexp_function(t, tyopt, rhs)
+                              ; pexp_loc = h.pparam_loc
+                              ; pexp_loc_stack = []
+                              ; pexp_attributes = []
+             }))
         }
       ; migrate_type_immediacy = {
           srctype = [%typ: type_immediacy_t]
@@ -250,7 +304,7 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           | Otyp_arrow (v_0, v_1, v_2) ->
              let open DST in
              Otyp_arrow
-               ((match v_0 with SRC.Nolabel -> "" | Labelled s -> s),
+               (__dt__.migrate_arg_label_to_string __dt__ __inh__ v_0,
                 (fun __dt__ __inh__ -> __dt__.migrate_out_type __dt__ __inh__)
                   __dt__ __inh__ v_1,
                 (fun __dt__ __inh__ -> __dt__.migrate_out_type __dt__ __inh__)
@@ -273,12 +327,21 @@ let _migrate_list subrw0 __dt__ __inh__ l =
           | Octy_arrow (v_0, v_1, v_2) ->
              let open DST in
              Octy_arrow
-               ((match v_0 with SRC.Nolabel -> "" | Labelled s -> s),
+               (__dt__.migrate_arg_label_to_string __dt__ __inh__ v_0,
                 (fun __dt__ __inh__ -> __dt__.migrate_out_type __dt__ __inh__)
                   __dt__ __inh__ v_1,
                 (fun __dt__ __inh__ ->
                   __dt__.migrate_out_class_type __dt__ __inh__)
                   __dt__ __inh__ v_2)
+        }
+      ; migrate_arg_label_to_string = {
+          srctype = [%typ: arg_label]
+        ; dsttype = [%typ: string]
+        ; manual = true
+        ; code = fun __dst__ __inh__ -> function
+            SRC.Nolabel -> ""
+          | Labelled s -> s
+          | _ -> migration_error __inh__ "migrate_arg_label_to_string: unsupported label"
         }
       }
     }

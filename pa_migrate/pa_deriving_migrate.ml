@@ -139,6 +139,7 @@ value longid_of_dstmodule dsttype = fun [
 type tyarg_t = {
   srctype : ctyp
 ; dsttype : ctyp
+; manual : bool [@default False;]
 ; raw_dstmodule : option longid [@name dstmodule;]
 ; dstmodule : option longid [@computed longid_of_dstmodule dsttype raw_dstmodule;]
 ; inherit_code : option expr
@@ -291,6 +292,7 @@ value generate_default_dispatcher loc type_decls (tyid,dd) td =
    let open Dispatch1 in {
      srctype = srctype
    ; dsttype = dsttype
+   ; manual = False
    ; raw_dstmodule = None
    ; dstmodule = longid_of_dstmodule dsttype None
    ; inherit_code = inherit_code
@@ -453,7 +455,7 @@ value head_reduce1 t ty =
 
 value match_migrate_rule ~{except} t ctyp =
   List.find_map (fun (dname, t) ->
-    if (Some dname) = except then None else
+    if (Some dname) = except || t.Dispatch1.manual then None else
      ctyp
      |> (fun r -> pmatch t.Dispatch1.srctype r)
      |> Std.map_option (fun rho -> ((dname, t), rho))

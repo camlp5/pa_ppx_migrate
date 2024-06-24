@@ -283,3 +283,34 @@ type t1 = [%import: Ex_ast.AST4.t1]
 end
 
 
+module Migrate_AST5 = struct
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+type t = [%import:Ex_ast.AST5.t]
+[@@deriving migrate
+    { dispatch_type = dispatch_table_t
+    ; dispatch_table_constructor = make_dt
+    ; default_dispatchers = [
+        {
+          srcmod = Ex_ast.AST5
+        ; dstmod = Ex_ast.AST5
+        ; types = [
+            t
+          ]
+        }
+      ]
+    ; dispatchers = {
+        manual_migrate_t = {
+          srctype = [%typ: t]
+        ; dsttype = [%typ: t]
+        ; manual = true
+        ; code = fun _ t -> migration_error "should not be raising this"
+        }
+      }
+    }
+]
+end

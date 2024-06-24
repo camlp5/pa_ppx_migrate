@@ -15,9 +15,15 @@ let test_ast2_ast1 ctxt =
   assert_equal AST1.(A(loc0, "1", [2;3],(43,false))) 
     Migrate_AST2_AST1.(dt.migrate_t1 dt AST2.(A(loc0, 1, [2;3],(43,43,false))))
 
+let test_ast5 ctxt =
+  let dt = Migrate_AST5.make_dt () in
+  assert_equal AST5.(A 1) 
+    Migrate_AST5.(dt.migrate_t dt AST5.(A 1))
+
 let suite = "test_ex" >::: [
     "test_ast1_ast2"   >:: test_ast1_ast2
   ; "test_ast2_ast1"   >:: test_ast2_ast1
+  ; "test_ast5"   >:: test_ast5
   ]
 
 let _ = 

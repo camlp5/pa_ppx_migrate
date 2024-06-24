@@ -43,3 +43,7 @@ end
 module AST4 = struct
 type t1 = A of int list * float list
 end
+
+module AST5 = struct
+  type t = A of int | B
+end
