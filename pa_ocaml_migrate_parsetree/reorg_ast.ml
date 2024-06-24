@@ -4840,9 +4840,17 @@ and binding_op = [%import: All_ast.Ast_5_2.Parsetree.binding_op
            Asttypes.loc := location_loc
     ]
 ]
-and function_param_desc = [%import: All_ast.Ast_5_2.Parsetree.function_param_desc]
-and function_param = [%import: All_ast.Ast_5_2.Parsetree.function_param]
-and function_body = [%import: All_ast.Ast_5_2.Parsetree.function_body]
+and function_param_desc = [%import: All_ast.Ast_5_2.Parsetree.function_param_desc [@with Asttypes.loc := location_loc ; Asttypes.label := label ; Asttypes.arg_label := arg_label ; Asttypes.closed_flag := closed_flag ; Asttypes.rec_flag := rec_flag ; Asttypes.direction_flag := direction_flag ; Asttypes.private_flag := private_flag ; Asttypes.mutable_flag := mutable_flag ; Asttypes.virtual_flag := virtual_flag ; Asttypes.variance := variance ; Asttypes.override_flag := override_flag ; Asttypes.variance := variance ; Asttypes.injectivity := injectivity]]
+and function_param = [%import: All_ast.Ast_5_2.Parsetree.function_param
+    [@with Location.t := location_t ;
+           Asttypes.loc := location_loc
+    ]
+]
+and function_body = [%import: All_ast.Ast_5_2.Parsetree.function_body
+    [@with Location.t := location_t ;
+           Asttypes.loc := location_loc
+    ]
+]
 and type_constraint = [%import: All_ast.Ast_5_2.Parsetree.type_constraint]
 and value_description = [%import: All_ast.Ast_5_2.Parsetree.value_description
     [@with Location.t := location_t ;
@@ -5051,9 +5059,13 @@ and out_ident = [%import: All_ast.Ast_5_2.Outcometree.out_ident]
 and out_string = [%import: All_ast.Ast_5_2.Outcometree.out_string]
 and out_attribute = [%import: All_ast.Ast_5_2.Outcometree.out_attribute]
 and out_value = [%import: All_ast.Ast_5_2.Outcometree.out_value]
-and out_type = [%import: All_ast.Ast_5_2.Outcometree.out_type]
+and out_type = [%import: All_ast.Ast_5_2.Outcometree.out_type
+    [@with Asttypes.arg_label := arg_label]
+]
 and out_variant = [%import: All_ast.Ast_5_2.Outcometree.out_variant]
-and out_class_type = [%import: All_ast.Ast_5_2.Outcometree.out_class_type]
+and out_class_type = [%import: All_ast.Ast_5_2.Outcometree.out_class_type
+    [@with Asttypes.arg_label := arg_label]
+]
 and out_class_sig_item = [%import: All_ast.Ast_5_2.Outcometree.out_class_sig_item]
 and out_module_type = [%import: All_ast.Ast_5_2.Outcometree.out_module_type]
 and out_sig_item = [%import: All_ast.Ast_5_2.Outcometree.out_sig_item]
