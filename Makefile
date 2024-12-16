@@ -7,7 +7,7 @@ include $(TOP)/config/Makefile.top
 WD=$(shell pwd)
 DESTDIR=
 
-SYSDIRS= pa_migrate pa_ocaml_migrate_parsetree
+SYSDIRS= pa_migrate
 
 TESTDIRS= tests
 
@@ -37,13 +37,8 @@ install: sys
 	$(OCAMLFIND) remove pa_ppx_migrate || true
 	$(OCAMLFIND) install pa_ppx_migrate local-install/lib/pa_ppx_migrate/*
 
-install-all:
-	$(OCAMLFIND) remove pa_ppx_ocaml_migrate_parsetree || true
-	$(OCAMLFIND) install pa_ppx_ocaml_migrate_parsetree local-install/lib/pa_ppx_ocaml_migrate_parsetree/*
-
 uninstall:
 	$(OCAMLFIND) remove pa_ppx_migrate || true
-	$(OCAMLFIND) remove pa_ppx_ocaml_migrate_parsetree || true
 
 clean::
 	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done

@@ -15,21 +15,19 @@ can be brought to bear on the problem.
 
 ## Tests and Examples
 
-This project ships with a simple example of an AST migration (the one
-explained below) in the directory `test` as well as a full set of
-migrations for the Ocaml AST in the directory
-`pa_ocaml_migrate_parsetree`.  Both are built as part of the standard
-build procedure.
+This project ships with simple examples of AST migration (the one
+explained below) in the directory `test`.
 
 # How it works: A slightly long-winded explanation
 
 If you think about it, `ppx_deriving.map` isn't so different from what
-we need for `ocaml-migrate-parsetree`.  And with 11 versions of the
-Ocaml AST so far, maybe it's worth thinking about how to automate more
-of the task.  Also, since so much of it is type-structure-driven, one
-would think that it would be an excellent opportunity to apply PPX
-rewriting technology.  **Indeed, one might think that a good test of
-PPX rewriting, is the ability to automate precisely such tasks.**
+we need to migrate OCaml's AST from version-to-version.  And with 11
+versions of the Ocaml AST so far, maybe it's worth thinking about how
+to automate more of the task.  Also, since so much of it is
+type-structure-driven, one would think that it would be an excellent
+opportunity to apply PPX rewriting technology.  **Indeed, one might
+think that a good test of PPX rewriting, is the ability to automate
+precisely such tasks.**
 
 So what's hard about this migration task?  Here are some issues (maybe there are more):
 1. the types are slightly differently-organized in different versions of the AST.  Type might move from one module to another.
