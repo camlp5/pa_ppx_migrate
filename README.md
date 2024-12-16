@@ -2,7 +2,7 @@ A PPX Rewriter to help migrate from one version of an AST to another.
 
 ### Version
 
-This is ``pa_ppx_migrate`` (alpha) version 0.10.
+This is ``pa_ppx_migrate`` version 0.13.
 
 # Overview
 
