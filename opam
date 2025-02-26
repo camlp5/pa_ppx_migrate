@@ -35,7 +35,7 @@ depends: [
   "bos" { >= "0.2.0" }
 ]
 build: [
-  [make "-j%{jobs}%" "sys"]
+  [make "-j%{jobs}%" "DEBUG=-g" "sys"]
   [make "test"] {with-test}
 ]
 install: [make "install"]
