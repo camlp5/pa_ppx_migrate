@@ -104,6 +104,7 @@ value extract_case_branches = fun [
   List.map (fun (p,wheno,e) ->
       match Patt.unapplist p with [
         (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
+      | (<:patt< ` $cid$ >>, _) -> (cid, (p, wheno, e))
       | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: case-branches must start with a UIDENT")
       ]) l
 ]
@@ -485,7 +486,7 @@ value rec match_or_head_reduce loc ~{except} t ty =
     let ty' = head_reduce1 t ty in
     if Reloc.eq_ctyp ty ty' then
       match ty with [
-        (<:ctyp< [ $list:_$ ] >> | <:ctyp< { $list:_$ } >> | <:ctyp< ( $list:_$ ) >> | <:ctyp< ' $_$ >> | <:ctyp< $lid:_$ >>) -> Right (dname, ty)
+        (<:ctyp< [ $list:_$ ] >> | <:ctyp< [= $list:_$ ] >> | <:ctyp< { $list:_$ } >> | <:ctyp< ( $list:_$ ) >> | <:ctyp< ' $_$ >> | <:ctyp< $lid:_$ >>) -> Right (dname, ty)
 
       | _ -> Ploc.raise loc (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname Pp_MLast.pp_ctyp ty))
       ]
@@ -574,6 +575,29 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
     ]) branches in
   let l = List.concat ll in
   <:expr< fun [ $list:l$ ] >>
+
+| <:ctyp:< [= $list:l$ ] >> as z ->
+  let branches = List.concat_map (fun [
+    PvTag loc cid _ tyl _ ->
+    let cid = uv cid in
+      let custom_branches = Std.filter (fun (n, _) -> cid = n) d.Dispatch1.custom_branches in
+      if custom_branches <> [] then
+        List.map snd custom_branches
+      else
+      let tyl = uv tyl in
+      let argvars = List.mapi (fun i ty -> (Printf.sprintf "v_%d" i,ty)) tyl in
+      let patt = List.fold_left (fun p (v,_) -> <:patt< $p$ $lid:v$ >>) <:patt< ` $cid$ >> argvars in
+      let expr = List.fold_left (fun e (v,ty) ->
+          let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+          <:expr< $e$ ($app_dt t (fst sub_rw)$ $lid:v$) >>
+        ) <:expr< ` $cid$ >> argvars in
+      [(patt, <:vala< None >>, Dispatch1.expr_wrap_dsttype_module d expr)]
+
+  | PvInh loc ty ->
+     Fmt.(raise_failwithf loc "pa_deriving_migrate: we don't handle poly-variant inheritance: the OCaml compiler will expand the inheritance, so just use pa_ppx_import to import the type and you wont' have any inheritance.")
+  ]) l in
+  <:expr< fun [ $list:branches$ ] >>
+
 | <:ctyp:< { $list:ltl$ } >> ->
     let patt =
       let lpl = List.map (fun (_, lid, _, _, _) ->
@@ -595,6 +619,7 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
     | Some inhexp -> <:expr< let __inh__ = $inhexp$ in $expr$ >>
     ] in
     <:expr< fun [ $patt$ -> $expr$ ] >>
+
 | <:ctyp:< ( $list:tyl$ ) >> ->
     let patt =
       let pl = List.mapi (fun i ty ->

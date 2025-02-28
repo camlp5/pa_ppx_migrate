@@ -314,3 +314,68 @@ type t = [%import:Ex_ast.AST5.t]
     }
 ]
 end
+
+module Migrate_AST6 = struct
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+[%%import:Ex_ast.AST6.t]
+[@@deriving migrate
+    { dispatch_type = dispatch_table_t
+    ; dispatch_table_constructor = make_dt
+    ; default_dispatchers = [
+        {
+          srcmod = Ex_ast.AST6
+        ; dstmod = Ex_ast.AST6
+        ; types = [
+            t
+          ]
+        }
+      ]
+    ; dispatchers = {
+        manual_migrate_t = {
+          srctype = [%typ: t]
+        ; dsttype = [%typ: t]
+        ; manual = true
+        ; code = fun _ t -> migration_error "should not be raising this"
+        }
+      }
+    }
+]
+end
+
+module Migrate_AST7 = struct
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+[%%import:Ex_ast.AST7.t']
+[@@deriving migrate
+    { dispatch_type = dispatch_table_t
+    ; dispatch_table_constructor = make_dt
+    ; default_dispatchers = [
+        {
+          srcmod = Ex_ast.AST7
+        ; dstmod = Ex_ast.AST7
+        ; types = [
+            t'
+          ]
+        }
+      ]
+    ; dispatchers = {
+        manual_migrate_t' = {
+          srctype = [%typ: t']
+        ; dsttype = [%typ: t']
+        ; manual = true
+        ; code = fun _ t -> migration_error "should not be raising this"
+        }
+      }
+    }
+]
+end
+

@@ -47,3 +47,14 @@ end
 module AST5 = struct
   type t = A of int | B
 end
+
+module AST6 = struct
+  type t = [ `A | `B | `C of int  | `D of t ]
+
+end
+
+module AST7 = struct
+  type t = [ `A | `B | `C of int ]
+  type t' = [ t | `D of int ]
+end
+

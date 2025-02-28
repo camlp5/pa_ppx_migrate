@@ -20,10 +20,24 @@ let test_ast5 ctxt =
   assert_equal AST5.(A 1) 
     Migrate_AST5.(dt.migrate_t dt AST5.(A 1))
 
+let test_ast6 ctxt =
+  let dt = Migrate_AST6.make_dt () in
+  assert_equal AST6.(`C 1) 
+    Migrate_AST6.(dt.migrate_t dt AST6.(`C 1))
+
+let test_ast7 ctxt =
+  let dt = Migrate_AST7.make_dt () in
+  assert_equal AST7.(`C 1) 
+    Migrate_AST7.(dt.migrate_t' dt AST6.(`C 1))
+; assert_equal AST7.(`D 1) 
+    Migrate_AST7.(dt.migrate_t' dt AST6.(`D 1))
+
 let suite = "test_ex" >::: [
     "test_ast1_ast2"   >:: test_ast1_ast2
   ; "test_ast2_ast1"   >:: test_ast2_ast1
   ; "test_ast5"   >:: test_ast5
+  ; "test_ast6"   >:: test_ast6
+  ; "test_ast7"   >:: test_ast7
   ]
 
 let _ = 
