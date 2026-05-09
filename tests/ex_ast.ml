@@ -21,6 +21,7 @@ type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
 type t6 = E of { x : int } | F of { y : bool }
+type t7 = (a: int * t4')
 end
 
 module AST2 = struct
@@ -34,6 +35,7 @@ type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
 type t6 = E of { x : int } | F of { y : bool }
+type t7 = (a: int * t4')
 end
 
 module AST3 = struct

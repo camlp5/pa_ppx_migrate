@@ -88,9 +88,10 @@ value prettify rules t =
     | (<:ctyp:< $t1$ -> $t2$ >>, None) ->
       <:ctyp< $prec t1$ -> $prec t2$ >>
     | (<:ctyp:< ( $list:l$ ) >>, None) ->
-      <:ctyp:< ( $list:List.map prec l$ ) >>
+      <:ctyp:< ( $list:List.map prec_tuple l$ ) >>
     | (t, _) -> t
     ]
+  and prec_tuple (lab, ct) = (lab, prec ct)
   in prec t
 ;
 end
@@ -622,15 +623,22 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
 
 | <:ctyp:< ( $list:tyl$ ) >> ->
     let patt =
-      let pl = List.mapi (fun i ty ->
+      let pl = List.mapi (fun i (lab, ty) ->
           let lid = Printf.sprintf "v_%d" i in
-          <:patt< $lid:lid$ >>) tyl in
+          match uv lab with [
+              None -> <:patt< $lid:lid$ >>
+            | Some <:vala< lab >> -> <:patt< ~{$lid:lab$ = $lid:lid$} >>
+            ]
+                 ) tyl in
       <:patt< ( $list:pl$ ) >> in
     let expr =
-      let el = List.mapi (fun i ty ->
+      let el = List.mapi (fun i (lab, ty) ->
           let lid = Printf.sprintf "v_%d" i in
           let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
-          <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>
+          match uv lab with [
+              None -> <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>
+            | Some <:vala< lab >> -> <:expr< ~{$lid:lab$ = $app_dt t (fst sub_rw)$ $lid:lid$} >>
+            ]
         ) tyl in
       <:expr< ( $list:el$ ) >> in
     <:expr< fun [ $patt$ -> $expr$ ] >>
@@ -649,14 +657,22 @@ and generate_dispatcher_expression ~{except} t subs_rho ty =
   else match ty with [
     <:ctyp:< ( $list:tyl$ ) >> ->
       let patt =
-        let pl = List.mapi (fun i ty ->
+        let pl = List.mapi (fun i (lab, ty) ->
             let lid = Printf.sprintf "v_%d" i in
-            <:patt< $lid:lid$ >>) tyl in
+            match uv lab with [
+                None -> <:patt< $lid:lid$ >>
+              | Some <:vala< lab >> -> <:patt< ~{$lid:lab$ = $lid:lid$} >>
+              ]
+                   ) tyl in
         <:patt< ( $list:pl$ ) >> in
-      let exprs_types = List.mapi (fun i ty ->
+      let exprs_types = List.mapi (fun i (lab, ty) ->
             let lid = Printf.sprintf "v_%d" i in
             let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
-            (<:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>, snd sub_rw)
+            let e = match uv lab with [
+                  None -> <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>
+                | Some <:vala< lab >> -> <:expr< ~{$lid:lab$ = $app_dt t (fst sub_rw)$ $lid:lid$} >>
+                ] in
+            (e, (lab, snd sub_rw))
           ) tyl in
       let expr =
         let el = List.map fst exprs_types in

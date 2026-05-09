@@ -14,20 +14,23 @@ let migration_error feature =
 let _migrate_list subrw0 __dt__ l =
   List.map (subrw0 __dt__) l
 
-type t0 = [%import: Ex_ast.AST1.t0]
-and pvt2 = Ex_ast.AST1.pvt2
-and t1 = [%import: Ex_ast.AST1.t1
-  [@with [%typ: int * bool] := z1]
+[%%typedecls
+  [%%import: Ex_ast.AST1.t0]
+  [%%import: Ex_ast.AST1.pvt2]
+  [%%import: Ex_ast.AST1.t1
+    [@with [%typ: int * bool] := z1]
+  ]
+  type z1 = int * bool
+  [%%import: 'a Ex_ast.AST1.pt2]
+  [%%import: Ex_ast.AST1.t2]
+  [%%import: 'a Ex_ast.AST1.pt3]
+  [%%import: Ex_ast.pvt]
+  [%%import: Ex_ast.AST1.t4]
+  [%%import: Ex_ast.AST1.t4']
+  [%%import: Ex_ast.AST1.t5]
+  [%%import: Ex_ast.AST1.t6]
+  [%%import: Ex_ast.AST1.t7]
 ]
-and z1 = int * bool
-and 'a pt2 = [%import: 'a Ex_ast.AST1.pt2]
-and t2 = [%import: Ex_ast.AST1.t2]
-and 'a pt3 = [%import: 'a Ex_ast.AST1.pt3]
-and pvt = Ex_ast.pvt
-and t4 = [%import: Ex_ast.AST1.t4]
-and t4' = [%import: Ex_ast.AST1.t4']
-and t5 = [%import: Ex_ast.AST1.t5]
-and t6 = [%import: Ex_ast.AST1.t6]
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
@@ -42,6 +45,7 @@ and t6 = [%import: Ex_ast.AST1.t6]
           ; t4'
           ; t5
           ; t6
+          ; t7
           ]
         }
       ]
@@ -119,18 +123,20 @@ let migration_error feature =
 let _migrate_list subrw0 __dt__ l =
   List.map (subrw0 __dt__) l
 
-type t0 = [%import: Ex_ast.AST2.t0]
-and pvt2 = Ex_ast.AST2.pvt2
-and t1 = [%import: Ex_ast.AST2.t1
-  [@with [%typ: int * int * bool] := z1]
+[%%typedecls
+  [%%import: Ex_ast.AST2.t0]
+  [%%import: Ex_ast.AST2.pvt2]
+  [%%import: Ex_ast.AST2.t1
+    [@with [%typ: int * int * bool] := z1]
+  ]
+  type z1 = int * int * bool
+  [%%import: 'a Ex_ast.AST2.pt2]
+  [%%import: Ex_ast.AST2.t2]
+  [%%import: 'a Ex_ast.AST2.pt3]
+  [%%import: Ex_ast.pvt]
+  [%%import: Ex_ast.AST2.t4]
+  [%%import: Ex_ast.AST2.t4']
 ]
-and z1 = int * int * bool
-and 'a pt2 = [%import: 'a Ex_ast.AST2.pt2]
-and t2 = [%import: Ex_ast.AST2.t2]
-and 'a pt3 = [%import: 'a Ex_ast.AST2.pt3]
-and pvt = Ex_ast.pvt
-and t4 = [%import: Ex_ast.AST2.t4]
-and t4' = [%import: Ex_ast.AST2.t4']
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
