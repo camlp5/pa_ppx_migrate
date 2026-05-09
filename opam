@@ -1,4 +1,4 @@
-version: "0.14"
+version: "8.04.01"
 synopsis: "A PPX Rewriter for Migrating AST types (written using Camlp5)"
 description:
 """
