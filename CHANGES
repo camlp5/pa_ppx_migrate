@@ -9,10 +9,8 @@ pa_ppx_migrate Version 8.04.01
     for them in migrations.
 
   * Change version-numbering of pa_ppx_migrate so it matches that of
-    Camlp5, since it is almost always the case that a new version of
-    Camlp5 requires a new version of pa_ppx's base infra, and when
-    it's new syntax, changes to the various derivers to support that
-    new syntax.
+    Camlp5, since it is often the case that a Camlp5 AST change
+    ripples thru to pa_ppx_migrate.
 
 pa_ppx_migrate Version 0.14
 ---------------------------
