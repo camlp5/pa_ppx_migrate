@@ -21,7 +21,9 @@ type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
 type t6 = E of { x : int } | F of { y : bool }
+#if OCAML_VERSION >= (5,4,0)
 type t7 = (a: int * t4')
+#endif
 end
 
 module AST2 = struct
@@ -35,7 +37,9 @@ type t4 = t2 pt3
 type t4' = t2 pt3
 type t5 = unit
 type t6 = E of { x : int } | F of { y : bool }
+#if OCAML_VERSION >= (5,4,0)
 type t7 = (a: int * t4')
+#endif
 end
 
 module AST3 = struct

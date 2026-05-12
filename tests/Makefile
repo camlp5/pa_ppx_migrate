@@ -40,4 +40,4 @@ test_ex_camlp5.byte: ex_camlp5.cmo ex_map_camlp5.cmo test_ex_camlp5.cmo
 	-linkpkg -syntax camlp5o $^ -o $@
 
 clean::
-	rm -f  *.ppo.*
+	rm -f  *.ppo.* ex_ast.ml ex_migrate.ml ex_migrate.mli test_ex.ml

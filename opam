@@ -24,7 +24,7 @@ doc: "https://github.com/camlp5/pa_ppx_migrate/doc"
 x-ci-accept-failures: [ "opensuse-tumbleweed" ]
 
 depends: [
-  "ocaml"       { >= "5.4.0" }
+  "ocaml"       { >= "4.10.0" }
   "cppo" { >= "1.6.9" }
   "camlp5-buildscripts" { >= "0.02" }
   "camlp5"      { >= "8.04.01" }

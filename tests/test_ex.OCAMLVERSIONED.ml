@@ -9,8 +9,10 @@ let test_ast1_ast2 ctxt =
   let dt = Migrate_AST1_AST2.make_dt () in
   assert_equal AST2.({ it = C 1 ; z = `A ; z2 = `C ; extra = 3; new_field = 3 }) 
     Migrate_AST1_AST2.(migrate_t4 dt AST1.{ it = C true ; z = `A ; z2 = `C ; extra = 3 ; dropped_field = "1" })
+#if OCAML_VERSION >= (5,4,0)
 ; assert_equal AST2.(~a:5, { it = C 1 ; z = `A ; z2 = `C ; extra = 3; new_field = 3 }) 
     Migrate_AST1_AST2.(migrate_t7 dt AST1.(~a:5, { it = C true ; z = `A ; z2 = `C ; extra = 3 ; dropped_field = "1" }))
+#endif
 
 let test_ast2_ast1 ctxt =
   let dt = Migrate_AST2_AST1.make_dt () in

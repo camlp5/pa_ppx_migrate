@@ -1,13 +1,18 @@
 (**pp -syntax camlp5o *)
-
 module Ploc = Ex_ast.Ploc
-module Migrate_AST1_AST2 :
-  sig
-    module SRC = Ex_ast.AST1
-    module DST = Ex_ast.AST2
-    exception Migration_error of string
-    val migration_error : string -> 'a
-    val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
+
+module Migrate_AST1_AST2 = struct
+
+module SRC = Ex_ast.AST1
+module DST = Ex_ast.AST2
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+let _migrate_list subrw0 __dt__ l =
+  List.map (subrw0 __dt__) l
 
 [%%typedecls
   [%%import: Ex_ast.AST1.t0]
@@ -24,8 +29,11 @@ module Migrate_AST1_AST2 :
   [%%import: Ex_ast.AST1.t4']
   [%%import: Ex_ast.AST1.t5]
   [%%import: Ex_ast.AST1.t6]
+#if OCAML_VERSION >= (5,4,0)
   [%%import: Ex_ast.AST1.t7]
-][@@deriving migrate
+#endif
+]
+[@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
     ; default_open_recursion = false
@@ -39,7 +47,9 @@ module Migrate_AST1_AST2 :
           ; t4'
           ; t5
           ; t6
+#if OCAML_VERSION >= (5,4,0)
           ; t7
+#endif
           ]
         }
       ]
@@ -102,27 +112,35 @@ module Migrate_AST1_AST2 :
       }
     }
 ]
-  end
+end
 
-module Migrate_AST2_AST1 :
-  sig
-    module SRC = Ex_ast.AST2
-    module DST = Ex_ast.AST1
-    exception Migration_error of string
-    val migration_error : string -> 'a
-    val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
-type t0 = [%import: Ex_ast.AST2.t0]
-and pvt2 = Ex_ast.AST2.pvt2
-and t1 = [%import: Ex_ast.AST2.t1
-  [@with [%typ: int * int * bool] := z1]
+module Migrate_AST2_AST1 = struct
+
+module SRC = Ex_ast.AST2
+module DST = Ex_ast.AST1
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+let _migrate_list subrw0 __dt__ l =
+  List.map (subrw0 __dt__) l
+
+[%%typedecls
+  [%%import: Ex_ast.AST2.t0]
+  [%%import: Ex_ast.AST2.pvt2]
+  [%%import: Ex_ast.AST2.t1
+    [@with [%typ: int * int * bool] := z1]
+  ]
+  type z1 = int * int * bool
+  [%%import: 'a Ex_ast.AST2.pt2]
+  [%%import: Ex_ast.AST2.t2]
+  [%%import: 'a Ex_ast.AST2.pt3]
+  [%%import: Ex_ast.pvt]
+  [%%import: Ex_ast.AST2.t4]
+  [%%import: Ex_ast.AST2.t4']
 ]
-and z1 = int * int * bool
-and 'a pt2 = [%import: 'a Ex_ast.AST2.pt2]
-and t2 = [%import: Ex_ast.AST2.t2]
-and 'a pt3 = [%import: 'a Ex_ast.AST2.pt3]
-and pvt = Ex_ast.pvt
-and t4 = [%import: Ex_ast.AST2.t4]
-and t4' = [%import: Ex_ast.AST2.t4']
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
@@ -195,14 +213,21 @@ and t4' = [%import: Ex_ast.AST2.t4']
       }
     }
 ]
-  end
-module Migrate_AST3_AST4 :
-  sig
-    module SRC = Ex_ast.AST3
-    module DST = Ex_ast.AST4
-    exception Migration_error of string
-    val migration_error : string -> 'a
-    val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
+end
+
+module Migrate_AST3_AST4 = struct
+
+module SRC = Ex_ast.AST3
+module DST = Ex_ast.AST4
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+let _migrate_list subrw0 __dt__ l =
+  List.map (subrw0 __dt__) l
+
 type t1 = [%import: Ex_ast.AST3.t1]
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
@@ -227,14 +252,21 @@ type t1 = [%import: Ex_ast.AST3.t1]
       }
     }
 ]
-  end
-module Migrate_AST4_AST3 :
-  sig
-    module SRC = Ex_ast.AST4
-    module DST = Ex_ast.AST3
-    exception Migration_error of string
-    val migration_error : string -> 'a
-    val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
+end
+
+module Migrate_AST4_AST3 = struct
+
+module SRC = Ex_ast.AST4
+module DST = Ex_ast.AST3
+
+exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
+
+let _migrate_list subrw0 __dt__ l =
+  List.map (subrw0 __dt__) l
+
 type t1 = [%import: Ex_ast.AST4.t1]
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
@@ -258,11 +290,15 @@ type t1 = [%import: Ex_ast.AST4.t1]
       }
     }
 ]
-  end
+end
 
-module Migrate_AST5 : sig
+
+module Migrate_AST5 = struct
 
 exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
 
 type t = [%import:Ex_ast.AST5.t]
 [@@deriving migrate
@@ -288,11 +324,15 @@ type t = [%import:Ex_ast.AST5.t]
     }
 ]
 end
-module Migrate_AST6 : sig
+
+module Migrate_AST6 = struct
 
 exception Migration_error of string
 
-type t = [%import:Ex_ast.AST6.t]
+let migration_error feature =
+  raise (Migration_error feature)
+
+[%%import:Ex_ast.AST6.t]
 [@@deriving migrate
     { dispatch_type = dispatch_table_t
     ; dispatch_table_constructor = make_dt
@@ -316,9 +356,13 @@ type t = [%import:Ex_ast.AST6.t]
     }
 ]
 end
-module Migrate_AST7 : sig
+
+module Migrate_AST7 = struct
 
 exception Migration_error of string
+
+let migration_error feature =
+  raise (Migration_error feature)
 
 [%%import:Ex_ast.AST7.t']
 [@@deriving migrate
@@ -344,3 +388,4 @@ exception Migration_error of string
     }
 ]
 end
+
