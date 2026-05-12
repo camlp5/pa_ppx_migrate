@@ -202,6 +202,38 @@ value patt_wrap_dsttype_module d p =
 end
 ;
 
+module Explanation = struct
+  type t = [
+    Toplevel of string
+  | In_tuple of ctyp
+  | Tycon of ctyp
+  | Rewrite of string
+  | Reduced of string and ctyp
+  | Constructor of string and ctyp
+  | Field of string and ctyp
+  ] ;
+  value pp1 pp_ctyp pps = fun [
+    Toplevel s -> Fmt.(pf pps "[toplevel %s]" s)
+  | In_tuple ty -> Fmt.(pf pps "[in tuple %a]" pp_ctyp ty)
+  | Tycon ty -> Fmt.(pf pps "[tycon %a]" pp_ctyp ty)
+  | Rewrite s ->  Fmt.(pf pps "[rewrite %s]" s)
+  | Reduced s ty -> Fmt.(pf pps "[reduced %s %a]" s pp_ctyp ty)
+  | Constructor s ty -> Fmt.(pf pps "[constructor %s %a]" s pp_ctyp ty)
+  | Field s ty -> Fmt.(pf pps "[field %s %a]" s pp_ctyp ty)
+  ] ;
+
+  value pp_list pp_ctyp pps l =
+    Fmt.(pf pps "%a" (list ~{sep=const string "\n"} (pp1 pp_ctyp)) l) ;
+
+  value pp pps l = pp_list Pp_MLast.pp_ctyp pps l ;
+end
+;
+
+exception Migration_exception of (list Explanation.t) and exn ;
+value raise_migration_exception loc ex exn =
+  Ploc.raise loc (Migration_exception ex exn)
+;
+
 module Migrate = struct
 
 type default_dispatcher_t = {
@@ -480,7 +512,7 @@ value match_migrate_rule ~{except} t ctyp =
 
 *)
 
-value rec match_or_head_reduce loc ~{except} t ty =
+value rec match_or_head_reduce loc ~{explain} ~{except} t ty =
   match (except, match_migrate_rule ~{except=except} t ty) with [
     (_, Some (d, rho)) -> Left (d, rho)
   | (Some dname, None) ->
@@ -489,12 +521,15 @@ value rec match_or_head_reduce loc ~{except} t ty =
       match ty with [
         (<:ctyp< [ $list:_$ ] >> | <:ctyp< [= $list:_$ ] >> | <:ctyp< { $list:_$ } >> | <:ctyp< ( $list:_$ ) >> | <:ctyp< ' $_$ >> | <:ctyp< $lid:_$ >>) -> Right (dname, ty)
 
-      | _ -> Ploc.raise loc (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname Pp_MLast.pp_ctyp ty))
+      | _ -> raise_migration_exception loc explain (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname Pp_MLast.pp_ctyp ty))
       ]
     else
-      match_or_head_reduce loc ~{except=except} t ty'
+      match_or_head_reduce ~{explain} loc ~{except=except} t ty'
   | (None, None) ->
-    Ploc.raise loc (Failure Fmt.(str "match_or_head_reduce: cannot head-reduce except at toplevel of a dispatcher's srctype: %a" Pp_MLast.pp_ctyp ty))
+    raise_migration_exception loc explain (Failure Fmt.(str "match_or_head_reduce: cannot head-reduce except at toplevel of a dispatcher's srctype: %a@.%a"
+                                   Pp_MLast.pp_ctyp ty
+                                 Explanation.pp explain
+      ))
   ]
 ;
 
@@ -537,7 +572,7 @@ value abs_dt t e =
   ]
 ;
 
-value rec generate_leaf_dispatcher_expression t d subs_rho ty =
+value rec generate_leaf_dispatcher_expression ~{explain} t d subs_rho ty =
   if AList.mem ~{cmp=Reloc.eq_ctyp} ty subs_rho then
     let (f_sub, f_result_ty) = AList.assoc ~{cmp=Reloc.eq_ctyp} ty subs_rho in
     let loc = loc_of_ctyp ty in
@@ -552,7 +587,8 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
       else
       let e =
         let d = { (d) with Dispatch1.dstmodule = None } in
-        generate_leaf_dispatcher_expression t d subs_rho <:ctyp< { $list:ltl$ } >> in
+        let explain = [Explanation.Constructor uid <:ctyp< { $list:ltl$ } >> :: explain] in
+        generate_leaf_dispatcher_expression ~{explain} t d subs_rho <:ctyp< { $list:ltl$ } >> in
       match e with [
           <:expr:< fun [ $patt$ -> $expr$ ] >> ->
               let expr = <:expr< $uid:uid$ $expr$ >> in
@@ -568,7 +604,8 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
       let argvars = List.mapi (fun i ty -> (Printf.sprintf "v_%d" i,ty)) tyl in
       let patt = List.fold_left (fun p (v,_) -> <:patt< $p$ $lid:v$ >>) <:patt< $uid:uid$ >> argvars in
       let expr = List.fold_left (fun e (v,ty) ->
-          let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+          let explain = [Explanation.Constructor uid ty :: explain] in
+          let sub_rw = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho ty in
           <:expr< $e$ ($app_dt t (fst sub_rw)$ $lid:v$) >>
         ) <:expr< $uid:uid$ >> argvars in
       [(patt, <:vala< None >>, Dispatch1.expr_wrap_dsttype_module d expr)]
@@ -589,7 +626,7 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
       let argvars = List.mapi (fun i ty -> (Printf.sprintf "v_%d" i,ty)) tyl in
       let patt = List.fold_left (fun p (v,_) -> <:patt< $p$ $lid:v$ >>) <:patt< ` $cid$ >> argvars in
       let expr = List.fold_left (fun e (v,ty) ->
-          let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+          let sub_rw = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho ty in
           <:expr< $e$ ($app_dt t (fst sub_rw)$ $lid:v$) >>
         ) <:expr< ` $cid$ >> argvars in
       [(patt, <:vala< None >>, Dispatch1.expr_wrap_dsttype_module d expr)]
@@ -608,7 +645,8 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
     let expr =
       let trimmed_ltl = Std.filter (fun (_, lid, _, _, _) -> not (List.mem lid d.Dispatch1.skip_fields)) ltl in 
       let trimmed_lel = List.map (fun  (_, lid, _, ty, _) ->
-          let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+          let explain = [Explanation.Field lid ty :: explain] in
+          let sub_rw = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho ty in
           (Dispatch1.patt_wrap_dsttype_module d <:patt< $lid:lid$ >>, <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>)
         ) trimmed_ltl in
       let full_lel = trimmed_lel @ (
@@ -633,8 +671,9 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
       <:patt< ( $list:pl$ ) >> in
     let expr =
       let el = List.mapi (fun i (lab, ty) ->
+          let explain = [Explanation.In_tuple ty :: explain] in
           let lid = Printf.sprintf "v_%d" i in
-          let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+          let sub_rw = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho ty in
           match uv lab with [
               None -> <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>
             | Some <:vala< lab >> -> <:expr< ~{$lid:lab$ = $app_dt t (fst sub_rw)$ $lid:lid$} >>
@@ -647,7 +686,7 @@ value rec generate_leaf_dispatcher_expression t d subs_rho ty =
                     Pp_MLast.pp_ctyp ty))
 ]
 
-and generate_dispatcher_expression ~{except} t subs_rho ty = 
+and generate_dispatcher_expression ~{explain} ~{except} t subs_rho ty = 
   if AList.mem ~{cmp=Reloc.eq_ctyp} ty subs_rho then
     let (f_sub, f_result_ty) = AList.assoc ~{cmp=Reloc.eq_ctyp} ty subs_rho in
     let loc = loc_of_ctyp ty in
@@ -656,6 +695,7 @@ and generate_dispatcher_expression ~{except} t subs_rho ty =
     (id_expr t, ty)
   else match ty with [
     <:ctyp:< ( $list:tyl$ ) >> ->
+      let explain = [Explanation.In_tuple ty ::  explain] in
       let patt =
         let pl = List.mapi (fun i (lab, ty) ->
             let lid = Printf.sprintf "v_%d" i in
@@ -667,7 +707,7 @@ and generate_dispatcher_expression ~{except} t subs_rho ty =
         <:patt< ( $list:pl$ ) >> in
       let exprs_types = List.mapi (fun i (lab, ty) ->
             let lid = Printf.sprintf "v_%d" i in
-            let sub_rw = generate_dispatcher_expression ~{except=None} t subs_rho ty in
+            let sub_rw = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho ty in
             let e = match uv lab with [
                   None -> <:expr< $app_dt t (fst sub_rw)$ $lid:lid$ >>
                 | Some <:vala< lab >> -> <:expr< ~{$lid:lab$ = $app_dt t (fst sub_rw)$ $lid:lid$} >>
@@ -682,18 +722,20 @@ and generate_dispatcher_expression ~{except} t subs_rho ty =
         <:ctyp< ( $list:tyl$ ) >> in
       (abs_dt t <:expr< fun [ $patt$ -> $expr$ ] >>, rhsty)
     | _ ->
-      generate_tycon_dispatcher_expression ~{except=except} t subs_rho ty
+      let explain = [Explanation.Tycon ty ::  explain] in
+      generate_tycon_dispatcher_expression ~{explain} ~{except=except} t subs_rho ty
   ]
 
-and generate_tycon_dispatcher_expression ~{except} t subs_rho ty = 
+and generate_tycon_dispatcher_expression ~{explain} ~{except} t subs_rho ty = 
   let loc = loc_of_ctyp ty in
-  match match_or_head_reduce loc ~{except=except} t ty with [
+  match match_or_head_reduce ~{explain} loc ~{except=except} t ty with [
     Left ((rwdname, rwd), lrho) ->
+    let explain = [Explanation.Rewrite rwdname ::  explain] in
     (** [rwd] is the migrate dispatcher that matched,
         and [lrho] is the substitution generated by the match. *)
     let (revsubs, rrho) = List.fold_left (fun (revsubs, rrho) (lhsty, rhsty) ->
         let conc_lhsty = Ctyp.subst lrho lhsty in
-        let (e, conc_rhsty) = generate_dispatcher_expression ~{except=None} t subs_rho conc_lhsty in
+        let (e, conc_rhsty) = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho conc_lhsty in
         let add_rrho = match pmatch rhsty conc_rhsty with [
           None -> Ploc.raise (loc_of_ctyp ty) (Failure "generate_dispatcher_expression: subterm dispatch returned non-matching type")
         | Some rho -> rho
@@ -707,18 +749,20 @@ and generate_tycon_dispatcher_expression ~{except} t subs_rho ty =
     (e, Ctyp.subst rrho rwd.Dispatch1.dsttype)
 
   | Right (dname, headredty) ->
+     let explain = [Explanation.Reduced dname headredty :: explain] in
     let d = List.assoc dname t.dispatchers in
 
     if List.mem (canon_ctyp headredty) builtin_copy_types then
       (id_expr t, d.Dispatch1.dsttype)
     else
-      let e = generate_leaf_dispatcher_expression t d subs_rho headredty in
+      let e = generate_leaf_dispatcher_expression ~{explain} t d subs_rho headredty in
       let e = abs_dt t e in
       (e, d.Dispatch1.dsttype)
   ]
 ;
 
 value toplevel_generate_dispatcher t (dname,d) = do {
+  let explain = [Explanation.Toplevel dname] in
   if debug.val then
     Fmt.(pf stderr "[toplevel_generate_dispatcher: %s]\n%!" dname)
   else () ;
@@ -731,7 +775,7 @@ value toplevel_generate_dispatcher t (dname,d) = do {
     let loc = loc_of_ctyp srctype in
     let subs_rho = List.mapi (fun i (lhsty, rhsty) -> (lhsty, (Printf.sprintf "__subrw_%d" i, rhsty))) d.Dispatch1.subs in
     let subs_binders = List.map2 (fun (_,(v, _)) ty -> <:patt< $lid:v$ >>) subs_rho d.Dispatch1.subs_types in
-    let (e, t) = generate_dispatcher_expression ~{except=Some dname} t subs_rho srctype in
+    let (e, t) = generate_dispatcher_expression ~{explain} ~{except=Some dname} t subs_rho srctype in
     let loc = loc_of_expr e in
     List.fold_right (fun p rhs -> <:expr< fun $p$ -> $rhs$ >>) subs_binders e
   ]
