@@ -39,5 +39,7 @@ test_ex_camlp5.byte: ex_camlp5.cmo ex_map_camlp5.cmo test_ex_camlp5.cmo
 	$(LAUNCH) $(OCAMLFIND) ocamlc $(DEBUG) $(WARNERR) -package $(PACKAGES) \
 	-linkpkg -syntax camlp5o $^ -o $@
 
+.SECONDARY: ex_ast.ml ex_migrate.ml ex_migrate.mli test_ex.ml
+
 clean::
 	rm -f  *.ppo.* ex_ast.ml ex_migrate.ml ex_migrate.mli test_ex.ml
