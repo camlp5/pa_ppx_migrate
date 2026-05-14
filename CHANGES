@@ -12,6 +12,8 @@ pa_ppx_migrate Version 8.04.01
     Camlp5, since it is often the case that a Camlp5 AST change
     ripples thru to pa_ppx_migrate.
 
+  * sync config/Makefile*
+
 pa_ppx_migrate Version 0.14
 ---------------------------
 
