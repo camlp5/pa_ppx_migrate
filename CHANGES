@@ -1,12 +1,15 @@
-pa_ppx_migrate Version 8.04.01
+pa_ppx_migrate Version 8.05.01
 ------------------------------
 
-* [09 May 2026]
+* [14 May 2026]
 
-  * update source to be compat with new camlp5 8.04.01, OCaml 5.4.0.
+  * update source to be compat with new camlp5 8.05.01, OCaml 5.5.0.
 
     OCaml 5.4 introduces labeled-tuples.  This release adds support
     for them in migrations.
+
+    OCaml 5.5 adds structure-items in let, type-functors, and external
+    types. This release adds support for them in migrations.
 
   * Change version-numbering of pa_ppx_migrate so it matches that of
     Camlp5, since it is often the case that a Camlp5 AST change
