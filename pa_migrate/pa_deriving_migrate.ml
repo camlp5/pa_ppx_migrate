@@ -1,4 +1,4 @@
-(**pp -syntax camlp5r *)
+(**pp -syntax camlp5r -package camlp5.printers *)
 (* pa_deriving_migrate.ml,v *)
 (* Copyright (c) INRIA 2007-2017 *)
 
@@ -225,7 +225,7 @@ module Explanation = struct
   value pp_list pp_ctyp pps l =
     Fmt.(pf pps "%a" (list ~{sep=const string "\n"} (pp1 pp_ctyp)) l) ;
 
-  value pp pps l = pp_list Pp_MLast.pp_ctyp pps l ;
+  value pp pps l = pp_list Printers.R.Pretty.pp_ctyp pps l ;
 end
 ;
 
@@ -527,7 +527,7 @@ value rec match_or_head_reduce loc ~{explain} ~{except} t ty =
       match_or_head_reduce ~{explain} loc ~{except=except} t ty'
   | (None, None) ->
     raise_migration_exception loc explain (Failure Fmt.(str "match_or_head_reduce: cannot head-reduce except at toplevel of a dispatcher's srctype: %a@.%a"
-                                   Pp_MLast.pp_ctyp ty
+                                   Printers.R.Pretty.pp_ctyp ty
                                  Explanation.pp explain
       ))
   ]
@@ -783,7 +783,7 @@ value toplevel_generate_dispatcher t (dname,d) = do {
 ;
 end ;
 
-value str_item_gen_migrate name arg = fun [
+value _str_item_gen_migrate name arg = fun [
   <:str_item:< type $_flag:_$ $list:tdl$ >> ->
     let rc = Migrate.build_context loc arg tdl in
     let dispatch_type_decls = Migrate.dispatch_table_type_decls loc rc in
@@ -807,6 +807,18 @@ value str_item_gen_migrate name arg = fun [
     let si1 = <:str_item< value $lid:rc.Migrate.dispatch_table_constructor$ = $dispatch_table_constructor_expression$ >> in
   <:str_item< declare type $list:dispatch_type_decls$ ; $si0$ ; $si1$ ; end >>
 | _ -> assert False ]
+;
+
+value str_item_gen_migrate name arg si =
+  try
+    _str_item_gen_migrate name arg si
+  with Ploc.Exc loc (Migration_exception explain e) as exn ->
+    let bt = Printexc.get_raw_backtrace() in do {
+      Fmt.(pf stderr "Pa_deriving_migrate.str_item_gen_migrate: Migration error:@.%a@.%a"
+             (Explanation.pp_list Printers.R.Pretty.pp_ctyp) explain
+             exn e) ;
+      Printexc.raise_with_backtrace exn bt
+    }
 ;
 
 value sig_item_gen_migrate name arg = fun [
