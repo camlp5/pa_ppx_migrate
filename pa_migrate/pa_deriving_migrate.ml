@@ -16,6 +16,8 @@ open Ppxutil ;
 value debug = Pa_passthru.debug ;
 open Pa_ppx_params_runtime.Runtime ;
 
+open Printers.R.Pretty ;
+
 value pmatch pat ty =
   let rec pmrec acc = fun [
     (t1, t2) when Reloc.eq_ctyp t1 t2 -> acc
@@ -176,7 +178,7 @@ value convert_field_name_list loc e =
   convert_down_list_expr
     (fun [ <:expr< $lid:f$ >> -> f
          | _ -> Ploc.raise (loc_of_expr e) (Failure Fmt.(str "convert_field_name_list: malformed list %a"
-                                                           Pp_MLast.pp_expr e))
+                                                           pp_expr e))
          ])
     e
 ;
@@ -225,7 +227,7 @@ module Explanation = struct
   value pp_list pp_ctyp pps l =
     Fmt.(pf pps "%a" (list ~{sep=const string "\n"} (pp1 pp_ctyp)) l) ;
 
-  value pp pps l = pp_list Printers.R.Pretty.pp_ctyp pps l ;
+  value pp pps l = pp_list pp_ctyp pps l ;
 end
 ;
 
@@ -256,7 +258,7 @@ value must_subst_lid (srclid, dstlid) li =
           ]
     | <:extended_longident:< $longid:_$ ( $longid:_$ ) >> ->
         Ploc.raise loc (Failure Fmt.(str "must_subst_lid: unexpected -extended- longid seen: %a"
-                                       Pp_MLast.pp_longid li))
+                                       pp_longident li))
     | _ -> None
     ]
   in srec li
@@ -272,7 +274,7 @@ value must_subst_lid_in_ctyp (srclid, dstlid) ty =
   | _ ->
     Ploc.raise (loc_of_ctyp ty)
       (Failure Fmt.(str "must_subst_lid_in_ctyp: the manifest type must be module-qualified:@ %a"
-                      Pp_MLast.pp_ctyp ty))
+                      pp_ctyp ty))
   ]
 ;
 
@@ -284,7 +286,7 @@ value fresh_tyv_args suffix ty =
       <:ctyp:< ' $id$ >>
     | _ -> Ploc.raise (loc_of_ctyp ty)
         (Failure Fmt.(str "fresh_tyv_args: can only apply to args that are type-variables:@ %a"
-                        Pp_MLast.pp_ctyp ty))
+                        pp_ctyp ty))
     ]) args in
   Ctyp.applist ty0 args
 ;
@@ -521,7 +523,7 @@ value rec match_or_head_reduce loc ~{explain} ~{except} t ty =
       match ty with [
         (<:ctyp< [ $list:_$ ] >> | <:ctyp< [= $list:_$ ] >> | <:ctyp< { $list:_$ } >> | <:ctyp< ( $list:_$ ) >> | <:ctyp< ' $_$ >> | <:ctyp< $lid:_$ >>) -> Right (dname, ty)
 
-      | _ -> raise_migration_exception loc explain (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname Pp_MLast.pp_ctyp ty))
+      | _ -> raise_migration_exception loc explain (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname pp_ctyp ty))
       ]
     else
       match_or_head_reduce ~{explain} loc ~{except=except} t ty'
@@ -683,7 +685,7 @@ value rec generate_leaf_dispatcher_expression ~{explain} t d subs_rho ty =
     <:expr< fun [ $patt$ -> $expr$ ] >>
 | ty -> Ploc.raise (loc_of_ctyp ty)
     (Failure Fmt.(str "generate_leaf_dispatcher_expression: unsupported type:@ %a"
-                    Pp_MLast.pp_ctyp ty))
+                    pp_ctyp ty))
 ]
 
 and generate_dispatcher_expression ~{explain} ~{except} t subs_rho ty = 
@@ -821,7 +823,7 @@ value str_item_gen_migrate name arg si =
     }
 ;
 
-value sig_item_gen_migrate name arg = fun [
+value _sig_item_gen_migrate name arg = fun [
   <:sig_item:< type $_flag:_$ $list:tdl$ >> ->
     let rc = Migrate.build_context loc arg tdl in
     let dispatch_type_decls = Migrate.dispatch_table_type_decls loc rc in
@@ -839,6 +841,18 @@ value sig_item_gen_migrate name arg = fun [
       value $lid:rc.dispatch_table_constructor$ : 'a -> dispatch_table_t 'a ;
   end >>
 | _ -> assert False ]
+;
+
+value sig_item_gen_migrate name arg si =
+  try
+    _sig_item_gen_migrate name arg si
+  with Ploc.Exc loc (Migration_exception explain e) as exn ->
+    let bt = Printexc.get_raw_backtrace() in do {
+      Fmt.(pf stderr "Pa_deriving_migrate.sig_item_gen_migrate: Migration error:@.%a@.%a"
+             (Explanation.pp_list Printers.R.Pretty.pp_ctyp) explain
+             exn e) ;
+      Printexc.raise_with_backtrace exn bt
+    }
 ;
 
 Pa_deriving.(Registry.add PI.{
