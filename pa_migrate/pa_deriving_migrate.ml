@@ -16,7 +16,7 @@ open Ppxutil ;
 value debug = Pa_passthru.debug ;
 open Pa_ppx_params_runtime.Runtime ;
 
-open Printers.R.Pretty ;
+open MLPrinters.R.Pretty ;
 
 value pmatch pat ty =
   let rec pmrec acc = fun [
@@ -529,7 +529,7 @@ value rec match_or_head_reduce loc ~{explain} ~{except} t ty =
       match_or_head_reduce ~{explain} loc ~{except=except} t ty'
   | (None, None) ->
     raise_migration_exception loc explain (Failure Fmt.(str "match_or_head_reduce: cannot head-reduce except at toplevel of a dispatcher's srctype: %a@.%a"
-                                   Printers.R.Pretty.pp_ctyp ty
+                                   pp_ctyp ty
                                  Explanation.pp explain
       ))
   ]
@@ -817,7 +817,7 @@ value str_item_gen_migrate name arg si =
   with Ploc.Exc loc (Migration_exception explain e) as exn ->
     let bt = Printexc.get_raw_backtrace() in do {
       Fmt.(pf stderr "Pa_deriving_migrate.str_item_gen_migrate: Migration error:@.%a@.%a"
-             (Explanation.pp_list Printers.R.Pretty.pp_ctyp) explain
+             (Explanation.pp_list pp_ctyp) explain
              exn e) ;
       Printexc.raise_with_backtrace exn bt
     }
@@ -849,7 +849,7 @@ value sig_item_gen_migrate name arg si =
   with Ploc.Exc loc (Migration_exception explain e) as exn ->
     let bt = Printexc.get_raw_backtrace() in do {
       Fmt.(pf stderr "Pa_deriving_migrate.sig_item_gen_migrate: Migration error:@.%a@.%a"
-             (Explanation.pp_list Printers.R.Pretty.pp_ctyp) explain
+             (Explanation.pp_list pp_ctyp) explain
              exn e) ;
       Printexc.raise_with_backtrace exn bt
     }
