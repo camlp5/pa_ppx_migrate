@@ -16,15 +16,15 @@ Fmt.(pf stdout {|# Specifications for the "pa_ppx_migrate" preprocessor:
 version = "%s"
 description = "pa_ppx_migrate deriver"
 
-  requires(toploop) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime,camlp5.printers"
+  requires(toploop) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime,camlp5.printers.full"
   archive(toploop) = "pa_deriving_migrate.cmo"
 
-    requires(syntax,preprocessor) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime,camlp5.printers"
+    requires(syntax,preprocessor) = "camlp5,pa_ppx.deriving,pa_ppx.params_runtime,camlp5.printers.full"
     archive(syntax,preprocessor,-native) = "pa_deriving_migrate.cmo"
     archive(syntax,preprocessor,native) = "pa_deriving_migrate.cmx"
 
   package "link" (
-  requires = "camlp5,pa_ppx.deriving.link,camlp5.printers.link"
+  requires = "camlp5,pa_ppx.deriving.link,camlp5.printers.full"
   archive(byte) = "pa_deriving_migrate.cmo"
   archive(native) = "pa_deriving_migrate.cmx"
   )

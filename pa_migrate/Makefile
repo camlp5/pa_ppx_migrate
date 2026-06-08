@@ -7,7 +7,7 @@ include $(TOP)/config/Makefile.sub
 
 DESTDIR=
 
-PACKAGES := $(PACKAGES),pa_ppx.deriving,pa_ppx.base,pa_ppx.unmatched_vala,pa_ppx.deriving_plugins.params,pa_ppx.deriving_plugins.std,pa_ppx.params_runtime,camlp5.printers
+PACKAGES := $(PACKAGES),pa_ppx.deriving,pa_ppx.base,pa_ppx.unmatched_vala,pa_ppx.deriving_plugins.params,pa_ppx.deriving_plugins.std,pa_ppx.params_runtime,camlp5.printers.full
 TARGET_PACKAGE=pa_ppx_migrate
 
 ML=\
