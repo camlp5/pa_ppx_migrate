@@ -16,7 +16,7 @@ open Ppxutil ;
 value debug = Pa_passthru.debug ;
 open Pa_ppx_params_runtime.Runtime ;
 
-open MLPrinters.R.Pretty ;
+open MLPrinters.OP.Pretty ;
 
 value pmatch pat ty =
   let rec pmrec acc = fun [
@@ -24,9 +24,9 @@ value pmatch pat ty =
   | (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
   | (<:ctyp< $p1$ $p2$ >>, <:ctyp< $t1$ $t2$ >>) ->
     pmrec (pmrec acc (p1, t1)) (p2, t2)
-  | (<:ctyp< ' $id$ >>, ty) ->
+  | (<:ctyp:< ' $id$ >>, ty) ->
     if List.mem_assoc id acc then
-      Ploc.raise (loc_of_ctyp pat) (Failure "polymorphic type-variables in patterns must not be repeated")
+      Ploc.raise loc (Failure "polymorphic type-variables in a pattern must not be repeated")
     else
       [ (id, ty) :: acc ]
   | _ -> failwith "caught"
@@ -53,6 +53,8 @@ type t = {
 ; rhs : MLast.ctyp
 }
 ;
+value pp pps {lhs=lhs;rhs=rhs} =
+    Fmt.(pf pps "{lhs=%a; rhs=%a}" pp_ctyp lhs pp_ctyp rhs) ;
 
 value mk1 (_, td) =
     let loc = loc_of_type_decl td in
@@ -61,19 +63,15 @@ value mk1 (_, td) =
     Ctyp.applist <:ctyp< $lid:name$ >> (List.map (type_var_to_type loc) (uv td.tdPrm)) in
   match td.tdDef with [
     <:ctyp:< $rhs$ == $_$ >> ->
-    (name, { lhs = lhs ; rhs = rhs })
+    Some (name, { lhs = lhs ; rhs = rhs })
   | rhs when not (is_generative_type rhs) ->
-    (name, { lhs = lhs ; rhs = rhs })
-  | _ -> Ploc.raise loc (Failure Fmt.(str "Prettify.mk1: cannot make prettify rule from type_decl %s: not a manifest type_decl" name))
+     Some (name, { lhs = lhs ; rhs = rhs })
+  | _ -> None
   ]
 ;
 
 value mk_from_type_decls tdl =
-  List.fold_right (fun td acc ->
-      match mk1 td with [
-        p -> [p::acc]
-      | exception Ploc.Exc _ _ -> acc
-      ]) tdl []
+  List.filter_map mk1 tdl
 ;
 
 value find_prettify_match rules t =
@@ -108,7 +106,7 @@ value extract_case_branches = fun [
       match Patt.unapplist p with [
         (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
       | (<:patt< ` $cid$ >>, _) -> (cid, (p, wheno, e))
-      | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: case-branches must start with a UIDENT")
+      | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT")
       ]) l
 ]
 ;
@@ -141,7 +139,8 @@ value longid_of_dstmodule dsttype = fun [
 ;
 
 type tyarg_t = {
-  srctype : ctyp
+  loc : (Ploc.t[@printer fun fmt _ -> Format.fprintf fmt "<loc>";]) [@computed (MLast.loc_of_expr __arg__);]
+; srctype : ctyp
 ; dsttype : ctyp
 ; manual : bool [@default False;]
 ; raw_dstmodule : option longid [@name dstmodule;]
@@ -155,7 +154,7 @@ type tyarg_t = {
 ; subs : list (ctyp * ctyp) [@default [];]
 ; type_vars : list string [@computed compute_type_vars srctype dsttype subs;]
 ; subs_types : list ctyp [@computed compute_subs_types loc subs;]
-} [@@deriving params;] ;
+} [@@deriving (show, params);] ;
 
 value to_type (_, t) =
   let loc = loc_of_ctyp t.srctype in
@@ -172,15 +171,6 @@ value convert_subs loc e =
     crec [ (t1, t2) :: acc ] tl
   ] in
   crec [] e
-;
-
-value convert_field_name_list loc e =
-  convert_down_list_expr
-    (fun [ <:expr< $lid:f$ >> -> f
-         | _ -> Ploc.raise (loc_of_expr e) (Failure Fmt.(str "convert_field_name_list: malformed list %a"
-                                                           pp_expr e))
-         ])
-    e
 ;
 
 value expr_wrap_dsttype_module d e =
@@ -213,8 +203,9 @@ module Explanation = struct
   | Reduced of string and ctyp
   | Constructor of string and ctyp
   | Field of string and ctyp
-  ] ;
-  value pp1 pp_ctyp pps = fun [
+  ][@@deriving show;];
+
+  value pp1_hum pp_ctyp pps = fun [
     Toplevel s -> Fmt.(pf pps "[toplevel %s]" s)
   | In_tuple ty -> Fmt.(pf pps "[in tuple %a]" pp_ctyp ty)
   | Tycon ty -> Fmt.(pf pps "[tycon %a]" pp_ctyp ty)
@@ -224,26 +215,53 @@ module Explanation = struct
   | Field s ty -> Fmt.(pf pps "[field %s %a]" s pp_ctyp ty)
   ] ;
 
-  value pp_list pp_ctyp pps l =
-    Fmt.(pf pps "%a" (list ~{sep=const string "\n"} (pp1 pp_ctyp)) l) ;
+  value pp_hum_list pp_ctyp pps l =
+    Fmt.(pf pps "%a" (list ~{sep=const string "\n"} (pp1_hum pp_ctyp)) l) ;
 
-  value pp pps l = pp_list pp_ctyp pps l ;
+  value pp_hum pps l =
+    Fmt.(pf pps "#<|%a|>" (pp_hum_list pp_ctyp) l) ;
 end
 ;
-
+(*
 exception Migration_exception of (list Explanation.t) and exn ;
+ *)
+type Pa_ppx_runtime.Exceptions.t +=
+       [ Migration_exception of Pa_ppx_runtime.Exceptions.t and (list Explanation.t) ] [@@deriving show;] ;
+
 value raise_migration_exception loc ex exn =
-  Ploc.raise loc (Migration_exception ex exn)
+  let ex = [] in
+  match exn with [
+      Failure msg ->
+      let msg = Fmt.(str "%s\n%a" msg Explanation.pp_hum ex) in
+      Ploc.raise loc (Failure msg)
+    | exn ->
+       Ploc.raise loc (Migration_exception exn ex)
+    ]
+(*
+  Ploc.raise loc (Migration_exception exn ex)
+ *)
 ;
 
 module Migrate = struct
 
+open Pa_ppx_params_runtime.Runtime ;
+
 type default_dispatcher_t = {
-  srcmod : longid
+  loc : (Ploc.t[@printer fun fmt _ -> Format.fprintf fmt "<loc>";]) [@computed (MLast.loc_of_expr __arg__);]
+; srcmod : longid
 ; dstmod : longid
 ; types : list lident
 ; inherit_code : (alist lident expr) [@default [];]
-} [@@deriving params;]
+} [@@deriving (show,params {
+    validators = {
+      default_dispatcher_t =
+        (fun dd ->
+          let extras = Std.subtract (List.map fst dd.inherit_code) dd.types in
+          if extras = [] then Result.Ok True
+          else Result.Error (dd.loc, Fmt.(str "build_default_dispatchers: extra members of inherit_code: %a"
+                                            (list ~{sep=sp} string) extras)))
+    }
+       });]
 ;
 
 value must_subst_lid (srclid, dstlid) li =
@@ -326,7 +344,8 @@ value generate_default_dispatcher loc type_decls (tyid,dd) td =
   ] in
   (rwname,
    let open Dispatch1 in {
-     srctype = srctype
+     loc = dd.loc
+   ; srctype = srctype
    ; dsttype = dsttype
    ; manual = False
    ; raw_dstmodule = None
@@ -348,14 +367,14 @@ value build_default_dispatchers loc type_decls dd =
  let inherit_code = dd.inherit_code in
   if not (Std.subset (List.map fst inherit_code) types) then
     let extras = Std.subtract (List.map fst inherit_code) types in
-    Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: extra members of inherit_code: %a"
+    Ploc.raise loc (Failure Fmt.(str "Internal error (please report): build_default_dispatchers: extra members of inherit_code: %a"
                                    (list ~{sep=sp} string) extras))
   else
   List.map (fun tyid ->
     match List.assoc tyid type_decls with [
       td ->
         generate_default_dispatcher (loc_of_type_decl td) type_decls (tyid, dd) td
-      | exception Not_found -> Ploc.raise loc (Failure Fmt.(str "build_default_dispatchers: type %s not declared" tyid))
+      | exception Not_found -> Ploc.raise dd.loc (Failure Fmt.(str "build_default_dispatchers: type %s not declared" tyid))
     ]) types
 ;
 
@@ -368,7 +387,8 @@ value compute_dispatchers loc type_decls declared_dispatchers default_dispatcher
 ;
 
 type t = {
-  optional : bool
+  loc : (Ploc.t[@printer fun fmt _ -> Format.fprintf fmt "<loc>";]) [@computed (MLast.loc_of_expr __arg__);]
+; optional : bool
 ; plugin_name : string
 ; inherit_type : option ctyp
 ; default_open_recursion : bool [@default True;]
@@ -379,20 +399,20 @@ type t = {
 ; declared_dispatchers : (alist lident Dispatch1.tyarg_t) [@default [];][@name dispatchers;]
 ; default_dispatchers : list default_dispatcher_t [@default [];]
 ; dispatchers : (alist lident Dispatch1.tyarg_t) [@computed compute_dispatchers loc type_decls declared_dispatchers default_dispatchers;]
-; type_decls : list (string * MLast.type_decl) [@computed type_decls;]
+; type_decls : list (string * (MLast.type_decl[@printer fun fmt _ -> Format.fprintf fmt "<typedecl>";])) [@computed type_decls;]
 ; pretty_rewrites : list (string * Prettify.t) [@computed Prettify.mk_from_type_decls type_decls;]
-} [@@deriving params {
+} [@@deriving (show,params {
     formal_args = {
       t = [ type_decls ]
     }
   ; validators = { t = fun rc ->
       if rc.default_open_recursion then
         if rc.open_recursion_dispatchers = [] then Result.Ok True
-        else Result.Error "when default_open_recursion is true, open_recursion_dispatchers should be []"
+        else Result.Error (rc.loc, "when default_open_recursion is true, open_recursion_dispatchers should be []")
       else if rc.closed_recursion_dispatchers = [] then Result.Ok True
-      else Result.Error "when default_open_recursion is false, closed_recursion_dispatchers should be []"
+      else Result.Error (rc.loc, "when default_open_recursion is false, closed_recursion_dispatchers should be []")
     }
-  };]
+  });]
 ;
 
 value dispatcher_open_recursion rc dname =
@@ -450,7 +470,7 @@ value build_context loc ctxt tdl =
   let repeated_dispatcher_names = Std2.hash_list_repeats (List.map fst dispatchers) in
   let sorted_repeated_dispatcher_names = List.sort Stdlib.compare repeated_dispatcher_names in
   if [] <> repeated_dispatcher_names then
-    Ploc.raise loc (Failure Fmt.(str "pa_deriving.migrate: dispatchers defined more than once: %a"
+    Ploc.raise rc.loc (Failure Fmt.(str "pa_deriving.migrate: dispatchers defined more than once: %a"
                                    (list ~{sep=sp} string) sorted_repeated_dispatcher_names))
   else
    rc
@@ -523,14 +543,16 @@ value rec match_or_head_reduce loc ~{explain} ~{except} t ty =
       match ty with [
         (<:ctyp< [ $list:_$ ] >> | <:ctyp< [= $list:_$ ] >> | <:ctyp< { $list:_$ } >> | <:ctyp< ( $list:_$ ) >> | <:ctyp< ' $_$ >> | <:ctyp< $lid:_$ >>) -> Right (dname, ty)
 
-      | _ -> raise_migration_exception loc explain (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a" dname pp_ctyp ty))
+      | _ -> raise_migration_exception loc explain (Failure Fmt.(str "migrate rule %s: cannot migrate srctype %a.%a" dname pp_ctyp ty
+                                                                   Explanation.pp_hum explain
+               ))
       ]
     else
       match_or_head_reduce ~{explain} loc ~{except=except} t ty'
   | (None, None) ->
-    raise_migration_exception loc explain (Failure Fmt.(str "match_or_head_reduce: cannot head-reduce except at toplevel of a dispatcher's srctype: %a@.%a"
+    raise_migration_exception loc explain (Failure Fmt.(str "match_or_head_reduce: No matching type-pattern in a migration rule for this type: %a@.%a"
                                    pp_ctyp ty
-                                 Explanation.pp explain
+                                   Explanation.pp_hum explain
       ))
   ]
 ;
@@ -683,9 +705,9 @@ value rec generate_leaf_dispatcher_expression ~{explain} t d subs_rho ty =
         ) tyl in
       <:expr< ( $list:el$ ) >> in
     <:expr< fun [ $patt$ -> $expr$ ] >>
-| ty -> Ploc.raise (loc_of_ctyp ty)
-    (Failure Fmt.(str "generate_leaf_dispatcher_expression: unsupported type:@ %a"
-                    pp_ctyp ty))
+| ty -> Fmt.(raise_failwithf (loc_of_ctyp ty)
+               "generate_leaf_dispatcher_expression: unsupported type:@ %a"
+               pp_ctyp ty)
 ]
 
 and generate_dispatcher_expression ~{explain} ~{except} t subs_rho ty = 
@@ -739,10 +761,16 @@ and generate_tycon_dispatcher_expression ~{explain} ~{except} t subs_rho ty =
         let conc_lhsty = Ctyp.subst lrho lhsty in
         let (e, conc_rhsty) = generate_dispatcher_expression ~{explain} ~{except=None} t subs_rho conc_lhsty in
         let add_rrho = match pmatch rhsty conc_rhsty with [
-          None -> Ploc.raise (loc_of_ctyp ty) (Failure "generate_dispatcher_expression: subterm dispatch returned non-matching type")
+          None ->
+          Fmt.(raise_failwith (loc_of_ctyp rhsty) "generate_dispatcher_expression: subterm dispatch returned non-matching type")
         | Some rho -> rho
         ] in
-        ([ e :: revsubs ], Env.append (loc_of_ctyp ty) rrho add_rrho)
+        if [] <> Std.intersect (List.map fst rrho) (List.map fst add_rrho) then
+          Fmt.(raise_failwithf (loc_of_ctyp rhsty)
+                 "generate_tycon_dispatcher_expression (ty=%a): overlapping type-variables on rhs of rewrite rule %s"
+                 pp_ctyp ty rwdname)
+        else
+          ([ e :: revsubs ], Env.append (loc_of_ctyp rhsty) rrho add_rrho)
       ) ([], []) rwd.Dispatch1.subs in
     let loc = loc_of_ctyp ty in
     let dexp = dispatcher_invocation_expression t loc rwdname in
@@ -785,7 +813,7 @@ value toplevel_generate_dispatcher t (dname,d) = do {
 ;
 end ;
 
-value _str_item_gen_migrate name arg = fun [
+value str_item_gen_migrate name arg = fun [
   <:str_item:< type $_flag:_$ $list:tdl$ >> ->
     let rc = Migrate.build_context loc arg tdl in
     let dispatch_type_decls = Migrate.dispatch_table_type_decls loc rc in
@@ -810,20 +838,21 @@ value _str_item_gen_migrate name arg = fun [
   <:str_item< declare type $list:dispatch_type_decls$ ; $si0$ ; $si1$ ; end >>
 | _ -> assert False ]
 ;
-
+(*
 value str_item_gen_migrate name arg si =
   try
     _str_item_gen_migrate name arg si
-  with Ploc.Exc loc (Migration_exception explain e) as exn ->
+  with Ploc.Exc loc (Migration_exception e explain) as exn ->
     let bt = Printexc.get_raw_backtrace() in do {
       Fmt.(pf stderr "Pa_deriving_migrate.str_item_gen_migrate: Migration error:@.%a@.%a"
-             (Explanation.pp_list pp_ctyp) explain
-             exn e) ;
+             exn e
+             Explanation.pp_hum explain
+      ) ;
       Printexc.raise_with_backtrace exn bt
     }
 ;
-
-value _sig_item_gen_migrate name arg = fun [
+ *)
+value sig_item_gen_migrate name arg = fun [
   <:sig_item:< type $_flag:_$ $list:tdl$ >> ->
     let rc = Migrate.build_context loc arg tdl in
     let dispatch_type_decls = Migrate.dispatch_table_type_decls loc rc in
@@ -842,19 +871,20 @@ value _sig_item_gen_migrate name arg = fun [
   end >>
 | _ -> assert False ]
 ;
-
+(*
 value sig_item_gen_migrate name arg si =
   try
     _sig_item_gen_migrate name arg si
-  with Ploc.Exc loc (Migration_exception explain e) as exn ->
+  with Ploc.Exc loc (Migration_exception e explain) as exn ->
     let bt = Printexc.get_raw_backtrace() in do {
       Fmt.(pf stderr "Pa_deriving_migrate.sig_item_gen_migrate: Migration error:@.%a@.%a"
-             (Explanation.pp_list pp_ctyp) explain
-             exn e) ;
+             exn e
+             Explanation.pp_hum explain
+      ) ;
       Printexc.raise_with_backtrace exn bt
     }
 ;
-
+ *)
 Pa_deriving.(Registry.add PI.{
   name = "migrate"
 ; alternates = []

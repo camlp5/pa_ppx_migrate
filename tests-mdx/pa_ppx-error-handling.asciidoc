@@ -32,7 +32,6 @@ Additional Camlp5 directives:
 ```
 
 ```ocaml
-# #require "pa_ppx.fail" ;;
 # let exc_converter = function
     Exit as exc ->
     let s = Printexc.to_string exc in
@@ -44,6 +43,7 @@ val exc_converter : exn -> Location.report option = <fun>
 ```
 
 ```ocaml
+# #require "pa_ppx.fail" ;;
 # [%fail "foo"] ;;
 File "_none_", line 1, characters 0-13:
 Failure: foo
@@ -52,185 +52,129 @@ Error: Stdlib.Exit
 ```
 
 ```ocaml
-#     [%fail "bar"] ;;
-File "_none_", line 1, characters 4-17:
-Failure: bar
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #require "pa_ppx.deriving_plugins.fail";;
+# #require "pa_ppx_migrate";;
+# #directory "../tests";;
+```
+
+
+```ocaml
+# #use "fixtures/ok1.ml";;
+module OK1 :
+  sig
+    module DST = Ex_ast.AST2
+    exception Migration_error of string
+    val migration_error : string -> 'a
+    val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
+    type t0 = string
+    and t1 = Ex_ast.AST1.t1 = A of Ploc.t * t0 * int list * z1
+    and z1 = int * bool
+    type 'aux dispatch_table_t = { aux : 'aux; }
+    and ('aux, 'a, 'b) migrater_t = 'aux dispatch_table_t -> 'a -> 'b
+    val migrate_list :
+      ('aux, 'a, 'b) migrater_t -> ('aux, 'a list, 'b list) migrater_t
+   val migrate_loc : ('aux, Ploc.t, Ploc.t) migrater_t
+    val migrate_t0 : ('aux, t0, int) migrater_t
+    val migrate_t1 : ('aux, t1, DST.t1) migrater_t
+   val migrate_z1 : ('aux, int * bool, int * int * bool) migrater_t
+    val make_dt : 'a -> 'a dispatch_table_t
+  end
 ```
 
 ```ocaml
-# #require "pa_ppx.deriving_plugins.located_sexp";;
-# #require "pa_ppx.deriving_plugins.sexp";;
-# #require "pa_ppx.deriving_plugins.yojson";;
+# #use "fixtures/bad01.ml";;
+File "fixtures/bad01.ml", line 4, characters 31-37:
+Failure: match_or_head_reduce: No matching type-pattern in a migration rule for this type: Ploc.t
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving located_sexp_of] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_located_sexp.to_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad02.ml";;
+File "fixtures/bad02.ml", line 4, characters 31-48:
+Failure: match_or_head_reduce: No matching type-pattern in a migration rule for this type: (t0, string) list
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving of_located_sexp] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_located_sexp.of_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad03.ml";;
+File "fixtures/bad03.ml", line 20, characters 33-36:
+Failure: polymorphic type-variables in a pattern must not be repeated
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving sexp_of] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_sexp.to_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad04.ml";;
+File "fixtures/bad04.ml", line 24, characters 40-43:
+Failure: generate_tycon_dispatcher_expression (ty=(int, string) choice): overlapping type-variables on rhs of rewrite rule migrate_choice
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving of_sexp] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_sexp.of_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad05.ml";;
+File "fixtures/bad05.ml", line 3, characters 5-7:
+Failure: migrate rule migrate_t1: cannot migrate srctype int -> int.[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving of_yojson] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_yojson.of_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad06.ml";;
+File "fixtures/bad06.ml", line 20, characters 33-36:
+Failure: polymorphic type-variables in a pattern must not be repeated
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving to_yojson] ;;
-File "_none_", line 1, characters 11-21:
-Failure: pa_deriving_yojson.to_expression: int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad07.ml";;
+File "fixtures/bad07.ml", line 3, characters 12-15:
+Failure: type_var_to_type: cannot accept unnamed polymorphic type variable
+[125]
 ```
 
 ```ocaml
-# #require "pa_ppx.import";;
+# #use "fixtures/bad08.ml";;
+File "fixtures/bad08.ml", line 42, characters 10-11:
+Failure: extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT
+[125]
 ```
 
 ```ocaml
-# [%%import: 'a option] ;;
-File "_none_", line 1, characters 11-20:
-Failure: unpack_imported_type: type-name lacks module-prefix: 'a option
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad09.ml";;
+File "fixtures/bad09.ml", line 15, characters 9-18:
+Failure: must_subst_lid: unexpected -extended- longid seen: Ex_ast(N)
+[125]
 ```
 
 ```ocaml
-# [%%import: Argle.bargle] ;;
-File "_none_", line 1, characters 11-16:
-Failure: pa_import: lookup_signature (impl_only=false): cannot find module Argle
-(Stdlib.Failure
-   "lookup_file: module Argle (cmi) not found\n[import_type: packages: ]\n")
-(Stdlib.Failure
-   "lookup_file: module Argle (mli) not found\n[import_type: packages: ]\n")
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad10.ml";;
+File "fixtures/bad10.ml", line 15, characters 9-11:
+Failure: must_subst_lid_in_ctyp: the manifest type must be module-qualified:
+t2
+[125]
 ```
 
 ```ocaml
-# [%%import: ('a, 'b) Stuff.choice] ;;
-type ('a, 'b) choice = ('a, 'b) Stuff.choice = Left of 'a | Right of 'b
-# type t = [%import: ('a, 'b, 'c) Stuff.choice] ;;
-Failure: import_type: type-param formal/actual list-length mismatch
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
-# type t = [%import: 'a Stuff.choice] ;;
-Failure: import_type: type-param formal/actual list-length mismatch
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
-# type t = [%import: Stuff.choice] ;;
-Failure: import_type: type-param formal/actual list-length mismatch
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad11.ml";;
+File "fixtures/bad11.ml", line 23, characters 8-190:
+Failure: params failed validation check: build_default_dispatchers: extra members of inherit_code: t2
+[125]
 ```
 
 ```ocaml
-# #require "pa_ppx.deriving_plugins.params";;
-# #require "camlp5.parser_quotations";;
-# let loc = Ploc.dummy ;;
-val loc : Ploc.t = <"":1:0-0>
-# let parse_expr = MLParsers.OP.Pretty.String.expr ;;
-val parse_expr : string -> MLParsers.RP_PAQ.Q_ast_base.E_MetaSig.t = <fun>
+# #use "fixtures/bad12.ml";;
+File "fixtures/bad12.ml", line 23, characters 8-128:
+Failure: build_default_dispatchers: type t2 not declared
+[125]
 ```
 
 ```ocaml
-# type foo = int -> int
-  [@@deriving params] ;;
-File "_none_", line 1, characters 11-21:
-Failure: generate_param_parser_expression: unhandled type
-int -> int
-
-Line 1, characters 0-0:
-Error: Stdlib.Exit
+# #use "fixtures/bad13.ml";;
+File "fixtures/bad13.ml", line 14, characters 0-1355:
+Failure: pa_deriving.migrate: dispatchers defined more than once: migrate_list
+[125]
 ```
 
 ```ocaml
-# type foo = int
-  [@@deriving params] ;;
-type foo = int
-val params_foo : MLast.expr -> foo = <fun>
-# params_foo <:expr< 1 >> ;;
-- : foo = 1
-# params_foo (parse_expr {|   "x"|}) ;;
-Exception:
-(Ploc.Exc (<"_none_":1:3-6>,
-   (Stdlib.Failure "param should be integer: \"x\"")))
-```
-
-```ocaml
-# type foo = string * string
-  [@@deriving params] ;;
-type foo = string * string
-val params_foo : MLast.expr -> string * string = <fun>
-# params_foo <:expr< 1 >> ;;
-Exception:
-(Ploc.Exc (<"":1:0-0>,
-   (Stdlib.Failure
-      "param must be a tuple of type: string * string\n\nparam: 1")
-   ))
-# params_foo (parse_expr{| ("x", 1) |}) ;;
-Exception:
-(Ploc.Exc (<"_none_":1:7-8>, (Stdlib.Failure "param should be string: 1")))
-```
-
-```ocaml
-# type foo = A of int * string | B of bool
-  [@@deriving params] ;;
-type foo = A of int * string | B of bool
-val params_foo : MLast.expr -> foo = <fun>
-# {|A (5,"a")|} |> parse_expr |> params_foo ;;
-- : foo = A (5, "a")
-# {|  C (5,"a")|} |> parse_expr |> params_foo ;;
-Exception:
-(Ploc.Exc (<"_none_":1:2-11>,
-   (Stdlib.Failure
-      "param must be a constructor of type:   A of int * string\n| B of bool\n\nparam: C (5, \"a\")")
-   ))
+# #use "fixtures/bad14.ml";;
+File "fixtures/bad14.ml", line 14, characters 22-23:
+Failure: pa_deriving_migrate: we don't handle poly-variant inheritance: the OCaml compiler will expand the inheritance, so just use pa_ppx_import to import the type and you wont' have any inheritance.
+[125]
 ```
