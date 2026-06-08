@@ -98,7 +98,7 @@ Failure: match_or_head_reduce: No matching type-pattern in a migration rule for 
 ```ocaml
 # #use "fixtures/bad03.ml";;
 File "fixtures/bad03.ml", line 20, characters 33-36:
-Failure: polymorphic type-variables in a pattern must not be repeated
+Failure: polymorphic type-variables in a pattern must not be repeated: a1
 [125]
 ```
 
@@ -118,7 +118,7 @@ Failure: migrate rule migrate_t1: cannot migrate srctype int -> int.[125]
 ```ocaml
 # #use "fixtures/bad06.ml";;
 File "fixtures/bad06.ml", line 20, characters 33-36:
-Failure: polymorphic type-variables in a pattern must not be repeated
+Failure: polymorphic type-variables in a pattern must not be repeated: a1
 [125]
 ```
 
@@ -132,7 +132,7 @@ Failure: type_var_to_type: cannot accept unnamed polymorphic type variable
 ```ocaml
 # #use "fixtures/bad08.ml";;
 File "fixtures/bad08.ml", line 42, characters 10-11:
-Failure: extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT
+Failure: extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT: x
 [125]
 ```
 

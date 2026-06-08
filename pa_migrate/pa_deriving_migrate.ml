@@ -24,11 +24,11 @@ value pmatch pat ty =
   | (<:ctyp< $lid:id$ >>, <:ctyp< $lid:id2$ >>) when id = id2 -> acc
   | (<:ctyp< $p1$ $p2$ >>, <:ctyp< $t1$ $t2$ >>) ->
     pmrec (pmrec acc (p1, t1)) (p2, t2)
-  | (<:ctyp:< ' $id$ >>, ty) ->
-    if List.mem_assoc id acc then
-      Ploc.raise loc (Failure "polymorphic type-variables in a pattern must not be repeated")
+  | (<:ctyp:< ' $s$ >>, ty) ->
+    if List.mem_assoc s acc then
+      Fmt.(raise_failwithf loc "polymorphic type-variables in a pattern must not be repeated: %s" s)
     else
-      [ (id, ty) :: acc ]
+      [ (s, ty) :: acc ]
   | _ -> failwith "caught"
   ]
   in
@@ -42,7 +42,7 @@ value pmatch pat ty =
 
 value type_var_to_type loc = fun [
       (<:vala< Some v >>, _) -> <:ctyp< ' $v$ >>
-    | _ -> Ploc.raise loc (Failure "type_var_to_type: cannot accept unnamed polymorphic type variable")
+    | _ -> raise_failwith loc "type_var_to_type: cannot accept unnamed polymorphic type variable"
 ]
 ;
 
@@ -106,7 +106,7 @@ value extract_case_branches = fun [
       match Patt.unapplist p with [
         (<:patt< $uid:uid$ >>, _) -> (uid, (p, wheno, e))
       | (<:patt< ` $cid$ >>, _) -> (cid, (p, wheno, e))
-      | _ -> Ploc.raise (loc_of_patt p) (Failure "extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT")
+      | _ -> Fmt.(raise_failwithf (loc_of_patt p) "extract_case_branches: 'custom_branches_code' case-branches must start with a UIDENT: %a" pp_patt p)
       ]) l
 ]
 ;
@@ -275,8 +275,8 @@ value must_subst_lid (srclid, dstlid) li =
           | Some li -> Some <:longident< $longid:li$ . $uid:uid$ >>
           ]
     | <:extended_longident:< $longid:_$ ( $longid:_$ ) >> ->
-        Ploc.raise loc (Failure Fmt.(str "must_subst_lid: unexpected -extended- longid seen: %a"
-                                       pp_longident li))
+        Fmt.(raise_failwithf loc "must_subst_lid: unexpected -extended- longid seen: %a"
+               pp_longident li)
     | _ -> None
     ]
   in srec li
@@ -290,9 +290,9 @@ value must_subst_lid_in_ctyp (srclid, dstlid) ty =
         | Some li -> Some (Ctyp.applist <:ctyp< $longid:li$ . $lid:lid$ >> args)
         ]
   | _ ->
-    Ploc.raise (loc_of_ctyp ty)
-      (Failure Fmt.(str "must_subst_lid_in_ctyp: the manifest type must be module-qualified:@ %a"
-                      pp_ctyp ty))
+    Fmt.(raise_failwithf (loc_of_ctyp ty)
+           "must_subst_lid_in_ctyp: the manifest type must be module-qualified:@ %a"
+           pp_ctyp ty)
   ]
 ;
 
@@ -302,9 +302,9 @@ value fresh_tyv_args suffix ty =
       <:ctyp:< ' $id$ >> ->
       let id = id ^ suffix in
       <:ctyp:< ' $id$ >>
-    | _ -> Ploc.raise (loc_of_ctyp ty)
-        (Failure Fmt.(str "fresh_tyv_args: can only apply to args that are type-variables:@ %a"
-                        pp_ctyp ty))
+    | _ -> Fmt.(raise_failwithf (loc_of_ctyp ty)
+                  "fresh_tyv_args: can only apply to args that are type-variables:@ %a"
+                  pp_ctyp ty)
     ]) args in
   Ctyp.applist ty0 args
 ;
@@ -367,14 +367,15 @@ value build_default_dispatchers loc type_decls dd =
  let inherit_code = dd.inherit_code in
   if not (Std.subset (List.map fst inherit_code) types) then
     let extras = Std.subtract (List.map fst inherit_code) types in
-    Ploc.raise loc (Failure Fmt.(str "Internal error (please report): build_default_dispatchers: extra members of inherit_code: %a"
-                                   (list ~{sep=sp} string) extras))
+    Fmt.(raise_failwithf loc "Internal error (please report): build_default_dispatchers: extra members of inherit_code: %a"
+           (list ~{sep=sp} string) extras)
   else
   List.map (fun tyid ->
     match List.assoc tyid type_decls with [
       td ->
         generate_default_dispatcher (loc_of_type_decl td) type_decls (tyid, dd) td
-      | exception Not_found -> Ploc.raise dd.loc (Failure Fmt.(str "build_default_dispatchers: type %s not declared" tyid))
+      | exception Not_found ->
+         Fmt.(raise_failwithf dd.loc "build_default_dispatchers: type %s not declared" tyid)
     ]) types
 ;
 
@@ -470,8 +471,8 @@ value build_context loc ctxt tdl =
   let repeated_dispatcher_names = Std2.hash_list_repeats (List.map fst dispatchers) in
   let sorted_repeated_dispatcher_names = List.sort Stdlib.compare repeated_dispatcher_names in
   if [] <> repeated_dispatcher_names then
-    Ploc.raise rc.loc (Failure Fmt.(str "pa_deriving.migrate: dispatchers defined more than once: %a"
-                                   (list ~{sep=sp} string) sorted_repeated_dispatcher_names))
+    Fmt.(raise_failwithf rc.loc "pa_deriving.migrate: dispatchers defined more than once: %a"
+           (list ~{sep=sp} string) sorted_repeated_dispatcher_names)
   else
    rc
 ;
@@ -479,12 +480,12 @@ value build_context loc ctxt tdl =
 
 value reduce1 ((id: string), tyargs) td = do {
   if List.length tyargs <> List.length (uv td.tdPrm) then
-    Ploc.raise (loc_of_type_decl td) (Failure "actual/formal length mismatch")
+    Fmt.(raise_failwith (loc_of_type_decl td) "actual/formal length mismatch")
   else () ;
   let rho = List.map2 (fun formal actual ->
       match formal with [
         ( <:vala< Some tyv >>, _ ) -> (tyv, actual)
-      | _ -> Ploc.raise (loc_of_type_decl td) (Failure "pa_deriving.migrate: blank formal type-variables are not supported")
+      | _ -> Fmt.(raise_failwith (loc_of_type_decl td) "pa_deriving.migrate: blank formal type-variables are not supported")
       ]
     ) (uv td.tdPrm) tyargs in
   let rho = Std.filter (fun [
