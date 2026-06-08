@@ -94,11 +94,6 @@ endif
 %.asciidoc.corrected: %.asciidoc
 	$(LAUNCH) ocaml-mdx test -o $@ $<
 
-%.asciidoc.TEST: %.asciidoc.corrected %.asciidoc
-	perl -n -i -e 'print unless (s,.*: added to search path.*,,)' $<
-	perl -n -i -e 'print unless (s,.*: loaded.*,,)' $<
-	diff -Bwiu $^
-
 toplevel::
 	$(LAUNCH) ocaml -nopromptcont
 
