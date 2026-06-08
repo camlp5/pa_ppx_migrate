@@ -1,7 +1,17 @@
 (**pp -syntax camlp5o -package pa_ppx_migrate  *)
 
+  module AST1 = struct
+type t0 = string
+type t1 = A of Ploc.t * t0 * int list * (int * bool)
+  end
+
+  module AST2 = struct
+type t0 = int
+type t1 = A of Ploc.t * t0 * int list * (int * int * bool)
+  end
+
 module OK1 = struct
-module DST = Ex_ast.AST2
+module DST = AST2
 
 exception Migration_error of string
 
@@ -12,7 +22,7 @@ let _migrate_list subrw0 __dt__ l =
   List.map (subrw0 __dt__) l
 
 type t0 = string
-and t1 = Ex_ast.AST1.t1 = A of Ploc.t * t0 * int list * z1
+and t1 = AST1.t1 = A of Ploc.t * t0 * int list * z1
 and z1 = int * bool
 [@@deriving
      migrate
@@ -21,8 +31,8 @@ and z1 = int * bool
     ; default_open_recursion = false
     ; default_dispatchers = [
         {
-          srcmod = Ex_ast.AST1
-        ; dstmod = Ex_ast.AST2
+          srcmod = AST1
+        ; dstmod = AST2
         ; types = [
             t1
           ]

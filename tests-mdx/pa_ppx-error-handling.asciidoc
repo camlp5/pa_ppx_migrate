@@ -54,29 +54,40 @@ Error: Stdlib.Exit
 ```ocaml
 # #require "pa_ppx.deriving_plugins.fail";;
 # #require "pa_ppx_migrate";;
-# #directory "../tests";;
 ```
 
 
 ```ocaml
 # #use "fixtures/ok1.ml";;
+module AST1 :
+  sig
+    type t0 = string
+    type t1 = A of Ploc.t * t0 * int list * (int * bool)
+  end
+
+module AST2 :
+  sig
+    type t0 = int
+    type t1 = A of Ploc.t * t0 * t0 list * (t0 * t0 * bool)
+  end
+
 module OK1 :
   sig
-    module DST = Ex_ast.AST2
+    module DST = AST2
     exception Migration_error of string
     val migration_error : string -> 'a
     val _migrate_list : ('a -> 'b -> 'c) -> 'a -> 'b list -> 'c list
     type t0 = string
-    and t1 = Ex_ast.AST1.t1 = A of Ploc.t * t0 * int list * z1
+    and t1 = AST1.t1 = A of Ploc.t * t0 * int list * z1
     and z1 = int * bool
     type 'aux dispatch_table_t = { aux : 'aux; }
     and ('aux, 'a, 'b) migrater_t = 'aux dispatch_table_t -> 'a -> 'b
     val migrate_list :
       ('aux, 'a, 'b) migrater_t -> ('aux, 'a list, 'b list) migrater_t
-   val migrate_loc : ('aux, Ploc.t, Ploc.t) migrater_t
+    val migrate_loc : ('aux, Ploc.t, Ploc.t) migrater_t
     val migrate_t0 : ('aux, t0, int) migrater_t
     val migrate_t1 : ('aux, t1, DST.t1) migrater_t
-   val migrate_z1 : ('aux, int * bool, int * int * bool) migrater_t
+    val migrate_z1 : ('aux, z1, int * int * bool) migrater_t
     val make_dt : 'a -> 'a dispatch_table_t
   end
 ```
