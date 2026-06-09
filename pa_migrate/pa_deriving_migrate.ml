@@ -1,4 +1,4 @@
-(**pp -syntax camlp5r *)
+(**pp -syntax camlp5r -package camlp5.parser_quotations *)
 (* pa_deriving_migrate.ml,v *)
 (* Copyright (c) INRIA 2007-2017 *)
 
